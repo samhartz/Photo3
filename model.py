@@ -435,8 +435,8 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
         if pType[species]=="CAM":
             M=Ma[t]
             z=za[t]
-            return Apsilc02(psi_l)*(AphiciTl(phi, ci, Tl) - Rdc(phi, Tl))*(1. - fTM(z, M)) + Asv(phi, Tl, psi_l, z, M) #(*Flux Asc + Asv*)
-            #return Apsilc02(psi_l)*(AphiciTl(phi, ci, Tl) )*(1. - fTM(z, M)) + Asv(phi, Tl, psi_l, z, M) 
+            return Apsilc02(psi_l)*(AphiciTl(phi, ci, Tl) - Rdc(phi, Tl))*(1. - fC(z, M)) + Asv(phi, Tl, psi_l, z, M) #(*Flux Asc + Asv*)
+            #return Apsilc02(psi_l)*(AphiciTl(phi, ci, Tl) )*(1. - fC(z, M)) + Asv(phi, Tl, psi_l, z, M) 
         else: #same function for both C3 and C4. no respiration 
             return Apsilc02(psi_l)*AphiciTl(phi, ci, Tl)
             #return Apsilc02(psi_l)*(AphiciTl(phi(tch(t)), ci, Tl) - Rd(Tl))) # with dark respiration
@@ -444,7 +444,7 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
         """Flux Asc from stomata to Calvin cycle"""
         M=Ma[t]
         z=za[t]
-        return Apsilc02(psi_l)*(AphiciTl(phi, ci, Tl) - Rdc(phi, Tl))*(1. - fTM(z, M)) #(*Flux Asc + Asv*) 
+        return Apsilc02(psi_l)*(AphiciTl(phi, ci, Tl) - Rdc(phi, Tl))*(1. - fC(z, M)) #(*Flux Asc + Asv*) 
     def Rroot(Tl):
         """Root respiration (umol/(m^2s))"""
         return beta_r*fA(Tl)*fTI(Tl)*froot[species]*B[t]
@@ -463,24 +463,27 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
     def Rdc(phi, Tl):
         """Flux of dark respiration to calvin cycle (umol/(m^2s))"""
         return Rd(Tl)*(1. - exp(-phi))
-    def fT(z):
+    def fO(z):
         """Circadian order function"""
         return exp(-(z/mu)**c3)
-    def fTM(z, M):
-        """Carbon circadian control"""
-        return (1. - fT(z))*M/(alpha_1*Mmax[species] + M)
+    def fM(z, M, Tl):
+        """Malic acid storage function"""
+        return fO(z)*(Mmax[species]*((Th - Tl)/(Th - Tw)*(1. - alpha_2) + alpha_2) - M)/(alpha_2*Mmax[species]*((Th - Tl)/(Th - Tw)*(1. - alpha_2) + alpha_2) + (Mmax[species]*((Th - Tl)/(Th - Tw)*(1. - alpha_2) + alpha_2) - M))
+    def fC(z, M):
+        """Carbon circadian control function"""
+        return (1. - fO(z))*M/(alpha_1*Mmax[species] + M)
     def Asv(phi, Tl, psi_l, z, M):
         """Flux from stomata to vacuole (umol/(m^2s))"""
         if phi>0 and M < .005:
             return 0.
         else:
             if Mmax[species]*((Th - Tl)/(Th - Tw)*(1. - alpha_2) + alpha_2) > M and (1. - k*(Tl - Topt1)**2.) >0:
-                return (Ammax[species]*(1. - k*(Tl - Topt1)**2.) - Rdv(phi, Tl))*fT(z)*(Mmax[species]*((Th - Tl)/(Th - Tw)*(1. - alpha_2) + alpha_2) - M)/(alpha_2*Mmax[species]*((Th - Tl)/(Th - Tw)*(1. - alpha_2) + alpha_2) + (Mmax[species]*((Th - Tl)/(Th - Tw)*(1. - alpha_2) + alpha_2) - M))*Apsilc02(psi_l)
+                return (Ammax[species]*(1. - k*(Tl - Topt1)**2.) - Rdv(phi, Tl))*fM(z, M, Tl)*Apsilc02(psi_l)
             else:
                 return 0.
     def Avc(phi, cc, Tl, z, M):
         """Flux from vacuole to calvin cycle (umol/(m^2s))"""
-        return (AphiciTl(phi, cc, Tl) - Rdc(phi, Tl))*fTM(z, M)
+        return (AphiciTl(phi, cc, Tl) - Rdc(phi, Tl))*fC(z, M)
     def MT(z, Tl, phi): 
         """Malic acid equilibrium value"""
         if phi>0.:
@@ -521,7 +524,7 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
     #     return CiNew(i) - ((1.+VPD(Ta[i], qa[i])/Dxnew[species])*Cs[i])/(a1new[species]*gmgsratio[pType[species]])   
     def CcNew(i, z, M):
         """CO2 concentration in mesophyll cytosol resulting from malic acid decarboxylation (ppm)"""
-        return CmNew(i) + fTM(z, M)*c0
+        return CmNew(i) + fC(z, M)*c0
     def MNew(i, psi_l, cc, Tl, z, M): 
         """Malic acid concentration"""
         return max(((dt/ Vcm)*(Asv(phi(tch(i)), Tl, psi_l, z, M) - Avc(phi(tch(i)), cc, Tl, z, M) + Rdv(phi(tch(i)), Tl))) + M, 0.)

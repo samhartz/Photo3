@@ -1,11 +1,12 @@
 from scipy.optimize import fsolve
 from sympy import *
 import Tkinter as tk
+import tkFileDialog
 import numpy as np
 import pandas as pd
 from math import exp, pi, sqrt
 import matplotlib.pyplot as plt
-import modelCAMint as model
+import model as model
 reload(model)
 
 root = tk.Tk()  #This creates a window, but it won't show up
@@ -14,13 +15,14 @@ root = tk.Tk()  #This creates a window, but it won't show up
 weatherOption = "ACTUAL"  #options: ACTUAL, AVG, BLM, STEP, CONST 
 lightOption = "ACTUAL" #options: ACTUAL, STEP, PAR
 rainOption = "DRYDWN" #options: ACTUAL, STOCH, DRYDWN, CONST
-duration = tk.IntVar(value = 30) #days (must be an integer)
+duration = tk.IntVar(value = 1) #days (must be an integer)
 sInit = tk.DoubleVar(value = 0.5)
 soilVariable = tk.StringVar(value="Sandy loam") # default value
 capVariable = tk.StringVar(value = "No")
 spVariable = tk.StringVar(value = "Triticum aestivum") # default value
 locVariable = tk.StringVar(value = "Zacatecas, Mexico") # default value
 rainVariable = tk.StringVar(value = "Drydown")
+weatherFile = tk.StringVar(value="sample_data\TempleAprilInterp.csv") #default value
 
 capOptions = {"No": False, "Yes": True}
 speciesOptions = {"Triticum aestivum": "T. aest", "Sorghum bicolor": "S. bico", "Opuntia ficus-indica": "O. ficu"}
@@ -42,7 +44,7 @@ def makeentry(root, caption, rowno, default):
     #entry.insert(0, default)
 
 def ok():
-    global capOn, species, sType, locs, Duration, s0
+    global capOn, species, sType, locs, Duration, s0, rainOption
     Duration = duration.get()
     s0 = sInit.get()
     capOn = capOptions[capVariable.get()]
@@ -50,37 +52,34 @@ def ok():
     sType = soilVariable.get()
     rainOption = rainOptions[rainVariable.get()]
     root.destroy()
+
+def choosefile():
+    global weatherFile
+    root.filename = tkFileDialog.askopenfilename(title = "Select file",filetypes = ( ("Text files","*.txt"), ("All files","*")))
+    weatherFile.set(root.filename)
+    print(weatherFile.get())
+    # weatherEntry = tk.Entry(root, textvariable = weatherFile)
+    # weatherEntry.grid(row = 2, column = 1)
+
     
 
 speciesmenu =  makemenu(root, 'Plant species:', 0, spVariable,  *speciesOptions.keys())
-capmenu = makemenu(root, 'Plant water storage?', 1, capVariable,  *capOptions.keys())
-soilmenu = makemenu(root, 'Choose soil type:', 2, soilVariable,  "Sandy loam", "Loamy sand","Loam", "Clay")
-#locationsmenu = makeentry(root, 'Location:', 3, locVariable,  "Temple, TX", "Zacatecas, Mexico","Sicily, Italy",
-#                     "Pernambuco, Brazil", "Addis Ababa, Ethiopia", "Karnal, India")
-rainmenu = makemenu(root, 'Rain:', 3, rainVariable,  *rainOptions.keys())
-durationinput = makeentry(root, 'Duration (days):', 4, duration)
-moistinput = makeentry(root, 'Init. soil moisture:', 5, sInit)
-
-button = tk.Button(root, text="Run", command=ok)
-button.grid(row=6, column = 1)
+capmenu = makemenu(root, 'Plant water storage:', 1, capVariable,  *capOptions.keys())
+wLbl = tk.Label(root, text = "Weather data file")
+wLbl.grid(row = 2, column = 0)
+weatherEntry = tk.Entry(root, textvariable = weatherFile)
+weatherEntry.grid(row = 2, column = 1)
+filebutton = tk.Button(root, text="Select file", command=choosefile)
+filebutton.grid(row=2, column = 2)
+soilmenu = makemenu(root, 'Soil type:', 3, soilVariable,  "Sandy loam", "Loamy sand","Loam", "Clay")
+rainmenu = makemenu(root, 'Soil moisture dynamics:', 4, rainVariable,  *rainOptions.keys())
+durationinput = makeentry(root, 'Duration (days):', 5, duration)
+moistinput = makeentry(root, 'Init. soil moisture (%):', 6, sInit)
+runbutton = tk.Button(root, text="Run", command=ok)
+runbutton.grid(row=7, column = 1)
 root.mainloop()                 #This command will tell the window to come out
 
-#Load weather data from excel files
-# if locVariable.get() == "Temple, TX":
-#     df = pd.read_csv("sample_data\TempleAprilInterp.csv"); 
-# elif locVariable.get() == "Zacatecas, Mexico":
-#     df = pd.read_csv("sample_data\MexicoDataApril1.csv");
-# elif locVariable.get() == "Addis Ababa, Ethiopia":
-#     df = pd.read_csv("sample_data\EthiopiaDataApril1.csv");
-# elif locVariable.get() == "Karnal, India":
-#     df = pd.read_csv("sample_data\IndiaDataApril1.csv"); 
-# elif locVariable.get() == "Pernambuco, Brazil":
-#     df = pd.read_csv("sample_data\BrazilDataApril1.csv");
-# else:
-#     df = pd.read_csv("sample_data\ItalyDataApril1.csv");
-# df = xl.parse('Average')
-
-df = pd.read_csv("sample_data\TempleAprilInterp.csv");
+df = pd.read_csv(weatherFile.get());
 
 if weatherOption == 'ACTUAL':
     tempC = df['Temperature']; #extracts temperature column from Excel Worksheet in Celcius
@@ -111,7 +110,7 @@ else:
 data = model.run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration, tempInp, qaInp, srInp, rInp, s0);
 
 #Save data
-data.to_pickle('sample_output/CAM_Mmaxfull_Temple_drydown_s05_OptStom')
+#data.to_pickle('sample_output/CAM_Mmaxhundreth_sstate_s05_OptStom')
 
 
 #Display output graphically
@@ -119,6 +118,15 @@ startDay = 0
 endDay = 30
 displayDays = endDay-startDay;
 timevec = np.linspace(startDay,endDay,144*displayDays);
+
+anp = plt.figure()
+plt.title("Carbon assimilation")
+plt.xlabel("time (d)")
+plt.ylabel("An (mol/m2/d)")
+#plt.plot(timevec, data['Vp'][144*startDay:144*endDay], label = 'Vp')
+plt.plot(timevec[0:144*Duration], data['An'][0:144*Duration], label = 'An')
+plt.legend()
+anp.show()
 
 # if pType[species] == "CAM":
 #     Mp = plt.figure()
@@ -278,14 +286,14 @@ timevec = np.linspace(startDay,endDay,144*displayDays);
 # # plt.plot(timevec, data['Tl'])
 # # tep.show()
 
-anp = plt.figure()
-plt.title("Carbon assimilation")
-plt.xlabel("time (d)")
-plt.ylabel("An (mol/m2/d)")
-#plt.plot(timevec, data['Vp'][144*startDay:144*endDay], label = 'Vp')
-plt.plot(timevec, data['An'][144*startDay:144*endDay], label = 'An')
-plt.legend()
-anp.show()
+# anp = plt.figure()
+# plt.title("Carbon assimilation")
+# plt.xlabel("time (d)")
+# plt.ylabel("An (mol/m2/d)")
+# #plt.plot(timevec, data['Vp'][144*startDay:144*endDay], label = 'Vp')
+# plt.plot(timevec, data['An'][144*startDay:144*endDay], label = 'An')
+# plt.legend()
+# anp.show()
 
 # flp = plt.figure()
 # plt.title("Carbon fluxes")
