@@ -21,14 +21,17 @@ and should match the model timestep of 10 minutes (see example files in the samp
 Recommended sources of data:
 
 Solar radiation, temperature, relative humidity
+
 Solar data, along with temperature and relative humidity data, may be retrieved from the [National Renewable Energy Laboratory database (NSRDB)][nsrdb] (MTS1-3) where it is available for a large number of sites across North America.
-Download GHI, temperature, and relative humidity
+
+
 Solar data across the globe may be obtained from the [Helicolim-3 database by the Solar Radiation Data Service (SoDa)][soda]. 
 
 [nsrdb]: https://maps.nrel.gov/nsrdb-viewer//?aL=UdPEX9
 [soda]: http://soda-pro.com/web-services/radiation/helioclim-3-for-free
 
 Temperature, relative humidity, rainfall
+
 Temperature and relative humidity data may be downloaded from the [Iowa Environmental Mesonet (IEM) network][iem], which also includes a link to a Python script for scraping data. Windspeed and precipitation is also available from this source. 
 
 [iem]: http://mesonet.agron.iastate.edu/request/download.phtml
