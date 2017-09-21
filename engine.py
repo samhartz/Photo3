@@ -22,7 +22,8 @@ capVariable = tk.StringVar(value = "No")
 spVariable = tk.StringVar(value = "Triticum aestivum") # default value
 locVariable = tk.StringVar(value = "Zacatecas, Mexico") # default value
 rainVariable = tk.StringVar(value = "Drydown")
-weatherFile = tk.StringVar(value="sample_data\TempleAprilInterp.csv") #default value
+weatherFile = tk.StringVar(value="sample_data\TempleAprilInterp.csv") #default value for the location of the weather data
+resultsFile = tk.StringVar(value = 'sample_output\output1') #default value for the location where results are saved
 
 capOptions = {"No": False, "Yes": True}
 speciesOptions = {"Triticum aestivum": "T. aest", "Sorghum bicolor": "S. bico", "Opuntia ficus-indica": "O. ficu"}
@@ -53,13 +54,19 @@ def ok():
     rainOption = rainOptions[rainVariable.get()]
     root.destroy()
 
-def choosefile():
+def chooseinputfile():
     global weatherFile
-    root.filename = tkFileDialog.askopenfilename(title = "Select file",filetypes = ( ("Text files","*.txt"), ("All files","*")))
+    root.filename = tkFileDialog.askopenfilename(title = "Select file",filetypes = ( ("Csv files","*.csv"), ("All files","*")))
     weatherFile.set(root.filename)
     print(weatherFile.get())
     # weatherEntry = tk.Entry(root, textvariable = weatherFile)
     # weatherEntry.grid(row = 2, column = 1)
+
+def chooseoutputfile():
+    global resultsFile
+    root.filename = tkFileDialog.asksaveasfilename(title = "Select file",filetypes = ( ("Csv files","*.csv"), ("All files","*")))
+    resultsFile.set(root.filename)
+    print(resultsFile.get())
 
     
 
@@ -69,14 +76,20 @@ wLbl = tk.Label(root, text = "Weather data file")
 wLbl.grid(row = 2, column = 0)
 weatherEntry = tk.Entry(root, textvariable = weatherFile)
 weatherEntry.grid(row = 2, column = 1)
-filebutton = tk.Button(root, text="Select file", command=choosefile)
+filebutton = tk.Button(root, text="Select file", command=chooseinputfile)
 filebutton.grid(row=2, column = 2)
 soilmenu = makemenu(root, 'Soil type:', 3, soilVariable,  "Sandy loam", "Loamy sand","Loam", "Clay")
 rainmenu = makemenu(root, 'Soil moisture dynamics:', 4, rainVariable,  *rainOptions.keys())
 durationinput = makeentry(root, 'Duration (days):', 5, duration)
 moistinput = makeentry(root, 'Init. soil moisture (%):', 6, sInit)
+svLbl = tk.Label(root, text = "Save results as")
+svLbl.grid(row = 7, column = 0)
+saveEntry = tk.Entry(root, textvariable = resultsFile)
+saveEntry.grid(row = 7, column = 1)
+savebutton = tk.Button(root, text="Select file", command=chooseoutputfile)
+savebutton.grid(row=7, column = 2)
 runbutton = tk.Button(root, text="Run", command=ok)
-runbutton.grid(row=7, column = 1)
+runbutton.grid(row=8, column = 1)
 root.mainloop()                 #This command will tell the window to come out
 
 df = pd.read_csv(weatherFile.get());
@@ -110,7 +123,7 @@ else:
 data = model.run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration, tempInp, qaInp, srInp, rInp, s0);
 
 #Save data
-#data.to_pickle('sample_output/CAM_Mmaxhundreth_sstate_s05_OptStom')
+data.to_pickle(resultsFile.get())
 
 
 #Display output graphically
