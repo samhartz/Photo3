@@ -1,11 +1,11 @@
 # Photo3
-The Photo3 model describes C3, C4, and CAM photosynthesis in a consistent manner using a model which is built on the Farquhar et al. model for carbon assimilation. The model incorporates soil and atmospheric conditions through a representation of the soil-plant-atmosphere continuum. Given soil moisture, air temperature, humidity and solar radiation, the model calculates net carbon assimilation and transpiration, among other variables of interest. The model is currently parameterized for three representative species, one from each photosynthetic type: Triticum aestivum (C3), Sorghum bicolor (C4), and Opuntia ficus-indica (CAM).
+The Photo3 model describes C3, C4, and CAM photosynthesis in a consistent manner using a model which is built on the Farquhar et al. model for carbon assimilation. The model incorporates soil and atmospheric conditions through a representation of the soil-plant-atmosphere continuum. Given soil moisture, air temperature, humidity and solar radiation, the model calculates net carbon assimilation and transpiration, among other variables of interest. The model is currently parameterized for three representative species, one from each photosynthetic type: *Triticum aestivum* (C3), *Sorghum bicolor* (C4), and *Opuntia ficus-indica* (CAM).
 
 # Model Structure
 
 To run the model, simply run the file engine.py. A graphical user interface will display allowing the user to choose a plant species, soil type, soil moisture, duration of the simulation, and a data file containing weather inputs (solar radiation, temperature, and humidity). The engine.py file then calls the file model.py to generate the results, which it then exports and/or plots for the user. 
 
-The sample_data folder contains sample weather inputs for a location in Temple, TX, and the sample_output folder contains results from a few simulations in this area. 
+The sample_data folder contains sample weather inputs for a location in Temple, TX, and the sample_output folder contains results from a few simulations in this area. An academic article describing the model details is currently under review.
 
 # Model requirements
 This model was developed in Python 2.7 with the following packages: SciPy, NumPy, Pandas, Tkinter, Matplotlib. We suggest intalling a Python distribution such as [Anaconda][An] to meet these requirements.
