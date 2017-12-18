@@ -8,27 +8,30 @@ import matplotlib.pyplot as plt
 
 heatCap = False
 cpw = 4184. #specific heat of water (J/kg/K)
+VPdiff = 2500.
 
 #Soil parameters
-psi_ss = {'Sandy loam': -.7*10**-3, 'Loamy sand': -.17*10.**-3.,'Loam': -1.43*10.**-3., 'Clay': -1.82*10**-3.} #(MPa)
-b = {'Sandy loam': 4.9, 'Loamy sand':4.38, 'Loam': 5.39, 'Clay': 11.4}#(unitless)
-Ks = {'Sandy loam': 80.,'Loamy sand':100., 'Loam': 20., 'Clay': 1.} #Saturated hydraulic condutivity (cm/day)
-n = {'Sandy loam': .43, 'Loamy sand':.42,'Loam': .45, 'Clay': .5} #Porosity
-sh = {'Sandy loam':.14, 'Loamy sand':.08,'Loam': .19, 'Clay': 0.47} #Hygroscopic point
+psi_ss = {'Sand': -.34*10**-3, 'Sandy loam': -.7*10**-3, 'Loamy sand': -.17*10.**-3.,'Loam': -1.43*10.**-3., 'Clay': -1.82*10**-3.} #(MPa)
+b = {'Sand': 4.05,'Sandy loam': 4.9, 'Loamy sand':4.38, 'Loam': 5.39, 'Clay': 11.4}#(unitless)
+Ks = {'Sand': 200, 'Sandy loam': 80.,'Loamy sand':100., 'Loam': 20., 'Clay': 1.} #Saturated hydraulic condutivity (cm/day)
+n = {'Sand': .35, 'Sandy loam': .43, 'Loamy sand':.42,'Loam': .45, 'Clay': .5} #Porosity
+sh = {'Sand': .08, 'Sandy loam':.14, 'Loamy sand':.08,'Loam': .19, 'Clay': 0.47} #Hygroscopic point
 
 def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration, taInp, qaInp, phiInp, rInp, sInit):
 
     #using same Zr for all 3 crops
-    Zr=0.5
-    #Zr = {'T. aest': 0.75, 'P. menz': 0.65, 'O. ficu': 0.1, 'A. tequ': 0.3, 'S. bico': 0.5} # Rooting depth (m)
+    Zr=0.3
+    #Zr = {'T. aest': 0.75, 'P. menz': 0.65, 'O. ficu': 0.3, 'A. tequ': 0.3, 'S. bico': 0.5} # Rooting depth (m)
 
     #Plant photosynthetic parameters
 
     pType = {'T. aest': 'C3', 'P. menz': 'C3', 'O. ficu': 'CAM', 'A. tequ': 'CAM', 'S. bico': 'C4'} #Photosynthetic type
-    LAI = {'T. aest': 5., 'P. menz': 8.4, 'O. ficu': 3., 'A. tequ': 6., 'S. bico': 5.} #Leaf area index (m2/m2)
+    #LAI = {'T. aest': 5., 'P. menz': 8.4, 'O. ficu': 3., 'A. tequ': 6., 'S. bico': 5.} #Leaf area index (m2/m2)
+    LAI = {'T. aest': 5., 'P. menz': 8.4, 'O. ficu': 4.4, 'A. tequ': 6., 'S. bico': 5.} #Leaf area index (m2/m2)
 
-    #Vcmax0 = {'T. aest': 107.4,   'P. menz': 57.7,   'O. ficu': 13., 'A. tequ': 19.5, 'S. bico': 39.} #Max. carboxylation rate (\[Mu]mol/(m^2s^2))
+    #Vcmax0 = {'T. aest': 83.,   'P. menz': 57.7,   'O. ficu': 13., 'A. tequ': 19.5, 'S. bico': 39.} #Max. carboxylation rate (\[Mu]mol/(m^2s^2))
     Vcmax0 = {'T. aest': 83.,   'P. menz': 57.7,   'O. ficu': 13., 'A. tequ': 19.5, 'S. bico': 39.} #Max. carboxylation rate (\[Mu]mol/(m^2s^2))
+
     Hkc =    {'T. aest': 59430.,  'P. menz': 59430., 'O. ficu': 54930., 'A. tequ': 59430., 'S. bico': 59430.} #Activation Energy for Kc (J/mol)
     Hko =    {'T. aest': 36000.,  'P. menz': 36000., 'O. ficu': 36000., 'A. tequ': 36000., 'S. bico': 36000.} #Activation Energy for Ko (J/mol)
     HkR =    {'T. aest': 53000.,  'P. menz': 53000., 'O. ficu': 53000., 'A. tequ': 53000., 'S. bico': 53000.}  #Activation Energy for Rd (J/mol)
@@ -38,10 +41,11 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
     HaJ =    {'T. aest': 50000.,  'P. menz': 37870., 'O. ficu': 50000., 'A. tequ': 50000., 'S. bico': 50000.} #Activation Energy for Jmax (J/mol)
     HdJ =    {'T. aest': 200000., 'P. menz': 200000.,'O. ficu': 200000., 'A. tequ': 200000., 'S. bico': 200000.} #Deactivation Energy for Jmax (J/mol)
     #Jmax0 =  {'T. aest': 184.9,   'P. menz': 98.5,   'O. ficu': 2.*13., 'A. tequ': 2.*19.5, 'S. bico': 180.} #Max. e- transport rate (\[Mu]mol/(m^2s))
-    Jmax0 =  {'T. aest': 132.,   'P. menz': 98.5,   'O. ficu': 2.*13., 'A. tequ': 2.*19.5, 'S. bico': 180.} #Max. e- transport rate (\[Mu]mol/(m^2s))
+    Jmax0 =  {'T. aest': 132.,   'P. menz': 98.5,   'O. ficu': 2.*Vcmax0['O. ficu'], 'A. tequ': 2.*19.5, 'S. bico': 180.} #Max. e- transport rate (\[Mu]mol/(m^2s))
 
     Dxnew = {'T. aest': 300.,  'P. menz': 300.,  'O. ficu': 300.,  'A. tequ': 300.,  'S. bico': 300.}
     a1new = {'T. aest': 15., 'P. menz': 15., 'O. ficu': 0.6*15., 'A. tequ': 0.6*15., 'S. bico': 0.5*15.}
+    #a1new = {'T. aest': 15., 'P. menz': 15., 'O. ficu': 2.75/.23, 'A. tequ': 0.6*15., 'S. bico': 0.5*15.}
 
     Kc0 = {'T. aest': 302., 'P. menz': 302., 'O. ficu': 302., 'A. tequ': 302., 'S. bico': 302.} #Michaelis constant for C02 at To (\[Mu]mol/mol)
     Ko0 = {'T. aest': 256., 'P. menz': 256., 'O. ficu': 256., 'A. tequ': 256., 'S. bico': 256.} #Michaelis constant for 02 at To (mmol/mol)
@@ -64,20 +68,27 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
     froot = {'T. aest': .25, 'P. menz': .25, 'O. ficu': .25, 'A. tequ': .25, 'S. bico': .25} #Ratio of root to total biomass
     a = 8.; #Parameter accounting for root growth
 
-    psi_la1O = {'T. aest': -.7, 'P. menz': -.5, 'O. ficu': -.5, 'A. tequ': -.5, 'S. bico': -.5} 
-    psi_laoO = {'T. aest': -2., 'P. menz': -3., 'O. ficu': -3., 'A. tequ': -3., 'S. bico': -1.8} 
+    #psi_la1O = {'T. aest': -.7, 'P. menz': -.5, 'O. ficu': -.5, 'A. tequ': -.5, 'S. bico': -.5} 
+    #psi_laoO = {'T. aest': -2., 'P. menz': -3., 'O. ficu': -3., 'A. tequ': -3., 'S. bico': -1.8} 
 
-    gwmax = {'T. aest': 0., 'P. menz': 0.05, 'O. ficu': .002, 'A. tequ': .002, 'S. bico': 0.} #Conductance b/t psi_x and psi_w, per unit root area (um/(MPa s))
-    gpmax = {'T. aest': 11.7, 'P. menz': 0.056, 'O. ficu': .04, 'A. tequ': .04, 'S. bico': 0.13} #Plant conductance, per unit leaf area(um/(MPa s))
-    Vwt = {'T. aest': .000001, 'P. menz': .027/LAI['P. menz'], 'O. ficu': .00415, 'A. tequ': .00415, 'S. bico': .000001} #Max. storage depth (m3/m2 leaf area)
-    cap = {'T. aest': 0.15, 'P. menz': 0.15, 'O. ficu': 0.27, 'A. tequ': 0.27, 'S. bico': 0.15} #Hydraulic capacitance (MPa-1)
+    psi_la1O = {'T. aest': -.7, 'P. menz': -.5, 'O. ficu': -.9, 'A. tequ': -.5, 'S. bico': -.5} 
+    psi_laoO = {'T. aest': -2., 'P. menz': -3., 'O. ficu': -5., 'A. tequ': -3., 'S. bico': -1.8} 
+
+    #gwmax = {'T. aest': 0., 'P. menz': 0.05, 'O. ficu': .002, 'A. tequ': .002, 'S. bico': 0.} #Conductance b/t psi_x and psi_w, per unit root area (um/(MPa s))
+    gwmax = {'T. aest': 0., 'P. menz': 0.05, 'O. ficu': .02, 'A. tequ': .002, 'S. bico': 0.} #Conductance b/t psi_x and psi_w, per unit root area (um/(MPa s))
+    #gpmax = {'T. aest': 11.7, 'P. menz': 0.056, 'O. ficu': .04, 'A. tequ': .04, 'S. bico': 0.13} #Plant conductance, per unit leaf area(um/(MPa s))
+    gpmax = {'T. aest': 11.7, 'P. menz': 0.056, 'O. ficu': .4, 'A. tequ': .04, 'S. bico': 0.13} #Plant conductance, per unit leaf area(um/(MPa s))
+    #Vwt = {'T. aest': .000001, 'P. menz': .027/LAI['P. menz'], 'O. ficu': .00415, 'A. tequ': .00415, 'S. bico': .000001} #Max. storage depth (m3/m2 leaf area)
+    Vwt = {'T. aest': .000001, 'P. menz': .027/LAI['P. menz'], 'O. ficu': .0113, 'A. tequ': .00415, 'S. bico': .000001} #Max. storage depth (m3/m2 leaf area)
+    #cap = {'T. aest': 0.15, 'P. menz': 0.15, 'O. ficu': 0.27, 'A. tequ': 0.27, 'S. bico': 0.15} #Hydraulic capacitance (MPa-1)
+    cap = {'T. aest': 0.15, 'P. menz': 0.15, 'O. ficu': 0.83, 'A. tequ': 0.27, 'S. bico': 0.15} #Hydraulic capacitance (MPa-1)
 
     f = .5;
     beta_r = 1.25; #Root respiration coefficient
 
     #Initial Conditions
     s0 = sInit;  #Initial Soil moisture
-    Vwi =  .75*Vwt[species] #Initial Capacitance Depth (m3/m2 leaf area) 
+    Vwi =  1.*Vwt[species] #Initial Capacitance Depth (m3/m2 leaf area) 
 
     #C4 Constants from "Modeling of C3 and C4 photosynthesis under water-stressed conditions" Vico 2008
     gbs = .013 #Conductance between bundle sheath and mesophyll (mol m^-2s^-1)
@@ -89,8 +100,8 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
 
     #Parameters for CAM model from Bartlett 2014
     Mmax = {'O. ficu': 190000000., 'A. tequ': 130000000.} #max concentration of malic acid (umol/m^3)
-    #Mmax = {'O. ficu': 19., 'A. tequ': 130000000.} #max concentration of malic acid (umol/m^3)
-    Ammax = {'O. ficu': 13.5, 'A. tequ': 11.1} #rate of malic acid storage flux (umol/(m^2 s)
+    #Ammax = {'O. ficu': 13.5, 'A. tequ': 11.1} #rate of malic acid storage flux (umol/(m^2 s)
+    Ammax = {'O. ficu': 7., 'A. tequ': 11.1} #rate of malic acid storage flux (umol/(m^2 s)
     tr = 90.; #Relaxation time (m)
     c0 = 3000. #parameter for decarboxylation of malic acid (umol/mol)
     alpha_1 = 1/100. ;
@@ -108,7 +119,8 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
     M0 = 0. #Initial Malic Acid Carbon Concentration (umol/m^3)
 
     #TimeStep Variables
-    timestepM = 10.; #Change in time at each step (min)
+    timestepM = 30; #Model change in time at each step (min)
+    timestepD = 30; #timestep of input data 
 
     #Rainfall parameters
     alpha = 1.5; #Average Precipitaion Amount (cm)
@@ -173,7 +185,8 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
     qa = []; #(*define array for specific humidity*)
     phiL=[];
     qia=[];
-    gpa = [gpmax[species]];
+    gpa = [gpmax[species]]
+    Aphicitla = [];
 
     #Extraneous arrays for data storage
     psi_atma =[]
@@ -185,6 +198,7 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
         za = [z0]
         Cc = []; #(*Cytoplasm Acid Carbon Concentration *)
         fDcO2 = []; #(*fdCO2 monitors the value of the air dryness function*)
+        MEa = [];
     else:
         pass
 
@@ -235,7 +249,7 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
                 return 0.       
         elif lightOption=="ACTUAL":
                 #return phiInp[int(t)] #int(t) rounds down to nearest hour integer
-                return phiInp[int((t-1)*60/timestepM)] 
+                return phiInp[int((t-1)*60/timestepM)*(timestepM/timestepD)] 
      
     #Atmospheric boundary layer
     def theta(h):
@@ -261,10 +275,16 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
         return (bsat*(csat+T-273.)-bsat*(T-273.))/(csat+T-273.)**2.*esat(T)
 
     qio = .622*esat(Tio)/po #Initial specific humidity, assuming a starting value at saturation*)
-    qaNight = .0082041;#Nighttime specific humidity
-    qaDay = .0082041 + .0004293;#(*daytime specific humidity*)
-    TaDay = 303.15;
-    TaNight = 288.15;
+    # qaNight = .0082041;#Nighttime specific humidity
+    # qaDay = .0082041 + .0004293;#(*daytime specific humidity*)
+    # TaDay = 303.15;
+    # TaNight = 288.15;
+
+    qaNight = .00802;#Nighttime specific humidity
+    qaDay = .00739;
+
+    TaDay = 300.;
+    TaNight = 288.;
     
     def TaSimple(t):
         return TaNight + (TaDay - TaNight)*phi(tch(t))/phi_max
@@ -280,6 +300,11 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
             return qaDay
         else:
             return qaNight
+    def qaV(t, VPdiff):
+        if phi(tch(t))>0:
+           return qaDay
+        else:
+           return (esat(TaNight)-esat(TaDay) +VPdiff + (qaDay*po)/.622)*0.622/po
         
     if weatherOption == "BLM":
         qa = [qio] #(*define array for specific humidity*)
@@ -404,6 +429,9 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
     def J(phi, Tl):
         """Electron transport rate (umol/(m^2s))"""
         return min((phi*10.**6)/(Ep*NA)*kappa_2*.5, Jmax(Tl)) 
+    def Jpar(phi, Tl):
+        """Electron transport rate (umol/(m^2s), based off of PAR, not total solar radiatoion)"""
+        return min(phi*kappa_2, Jmax(Tl)) 
     def Ko(Tl):
         """Michaelis-menten coefficient for O2"""
         return Ko0[species]*exp(Hko[species]/(R*To)*(1. - To/Tl))
@@ -418,7 +446,7 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
         return (J(phi, Tl)*(ci - Gamma(Tl)))/(4.*(ci + 2.*Gamma(Tl)))
     def AphiciTl(phi, ci, Tl):
         """Net photosynthetic demand for CO2 (umol/(m^2s^1))"""
-        return min(Ac(ci, Tl), Aq(phi, ci, Tl))
+        return max(min(Ac(ci, Tl), Aq(phi, ci, Tl)),0)
     def Apsilc02(psi_l):  
         """Vulnerability curve for water potential"""
         if psi_l < psi_laoO[species] :
@@ -435,16 +463,15 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
         if pType[species]=="CAM":
             M=Ma[t]
             z=za[t]
-            return Apsilc02(psi_l)*(AphiciTl(phi, ci, Tl) - Rdc(phi, Tl))*(1. - fC(z, M)) + Asv(phi, Tl, psi_l, z, M) #(*Flux Asc + Asv*)
+            return Asc(phi, psi_l, Tl, ci, z, M) + Asv(phi, Tl, psi_l, z, M) #(*Flux Asc + Asv*)
             #return Apsilc02(psi_l)*(AphiciTl(phi, ci, Tl) )*(1. - fC(z, M)) + Asv(phi, Tl, psi_l, z, M) 
         else: #same function for both C3 and C4. no respiration 
             return Apsilc02(psi_l)*AphiciTl(phi, ci, Tl)
             #return Apsilc02(psi_l)*(AphiciTl(phi(tch(t)), ci, Tl) - Rd(Tl))) # with dark respiration
-    def Asc(phi, psi_l, Tl, ci, t):
+    def Asc(phi, psi_l, Tl, ci, z, M):
         """Flux Asc from stomata to Calvin cycle"""
-        M=Ma[t]
-        z=za[t]
-        return Apsilc02(psi_l)*(AphiciTl(phi, ci, Tl) - Rdc(phi, Tl))*(1. - fC(z, M)) #(*Flux Asc + Asv*) 
+        #return max(0, Apsilc02(psi_l)*(AphiciTl(phi, ci, Tl) - Rdc(phi, Tl))*(1. - fC(z, M)))
+        return max(0, Apsilc02(psi_l)*(AphiciTl(phi, ci, Tl) - Rdc(phi, Tl))*(1. - fC(z, M)))
     def Rroot(Tl):
         """Root respiration (umol/(m^2s))"""
         return beta_r*fA(Tl)*fTI(Tl)*froot[species]*B[t]
@@ -474,24 +501,31 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
         return (1. - fO(z))*M/(alpha_1*Mmax[species] + M)
     def Asv(phi, Tl, psi_l, z, M):
         """Flux from stomata to vacuole (umol/(m^2s))"""
-        if phi>0 and M < .005:
-            return 0.
+        # if phi>0 and M < .005:
+        #     return 0.
+        # else:
+        #     if Mmax[species]*((Th - Tl)/(Th - Tw)*(1. - alpha_2) + alpha_2) > M and (1. - k*(Tl - Topt1)**2.) >0:
+        #         return (Ammax[species]*(1. - k*(Tl - Topt1)**2.) - Rdv(phi, Tl))*fM(z, M, Tl)*Apsilc02(psi_l)
+        #     else:
+        #         return 0.
+
+        if Mmax[species]*((Th - Tl)/(Th - Tw)*(1. - alpha_2) + alpha_2) > M and (1. - k*(Tl - Topt1)**2.) >0:
+            return (Ammax[species]*(1. - k*(Tl - Topt1)**2.) - Rdv(phi, Tl))*fM(z, M, Tl)*Apsilc02(psi_l)
         else:
-            if Mmax[species]*((Th - Tl)/(Th - Tw)*(1. - alpha_2) + alpha_2) > M and (1. - k*(Tl - Topt1)**2.) >0:
-                return (Ammax[species]*(1. - k*(Tl - Topt1)**2.) - Rdv(phi, Tl))*fM(z, M, Tl)*Apsilc02(psi_l)
-            else:
-                return 0.
+            return 0.
+        #return (Ammax[species]*(1. - k*(Tl - Topt1)**2.) - Rdv(phi, Tl))*fM(z, M, Tl)*Apsilc02(psi_l)
     def Avc(phi, cc, Tl, z, M):
         """Flux from vacuole to calvin cycle (umol/(m^2s))"""
         return (AphiciTl(phi, cc, Tl) - Rdc(phi, Tl))*fC(z, M)
-    def MT(z, Tl, phi): 
+    def MT(z, M, Tl, phi): 
         """Malic acid equilibrium value"""
         if phi>0.:
-            return Mmax[species]*(c1*((Th - Tl)/(Th - Tw) + 1.)*(beta*(z - mu))**3. - beta*(Th - Tl)/(Th - Tw)*(z - mu) + c2*(Th - Tl)/(Th - Tw)) 
+            return Mmax[species]*(c1*((Th - Tl)/(Th - Tw) + 1.)*(beta*(z - mu))**3. - beta*(Th - Tl)/(Th - Tw)*(z - mu) + c2*(Th - Tl)/(Th - Tw) -(1- fO(z))*(1-M/(M+alpha_1*Mmax[species]))) 
         else:
-            return Mmax[species]*(c1*((Th - Tl)/(Th - Tw) + 1.)*(beta*(z - mu))**3. - beta*(Th - Tl)/(Th - Tw)*(z - mu) + c2*(Th - Tl)/(Th - Tw)+ 50.*z**6.) 
+            return Mmax[species]*(c1*((Th - Tl)/(Th - Tw) + 1.)*(beta*(z - mu))**3. - beta*(Th - Tl)/(Th - Tw)*(z - mu) + c2*(Th - Tl)/(Th - Tw)+ (1-fO(z))) 
+            #return Mmax[species]*(c1*((Th - Tl)/(Th - Tw) + 1.)*(beta*(z - mu))**3. - beta*(Th - Tl)/(Th - Tw)*(z - mu) + c2*(Th - Tl)/(Th - Tw)+ 50.*z**6.) 
     def zNew(phi, M, z, Tl):
-        return max(0, dt*(M - MT(z, Tl, phi))/(Mmax[species]*60.*tr) + z)
+        return max(0, dt*(M - MT(z, M, Tl, phi))/(Mmax[species]*60.*tr) + z)
     def fD(vpd):
         """Stomatal response to vapor pressure deficit"""
         return 3/13./sqrt(vpd/1000.)
@@ -519,8 +553,8 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
     #     """CO2 concentration in stomatal cavity (ppm), Norman model"""
     #     return Rc[pType[species]]*ca   
     def CmNew(i):
-        return CiNew(i)
-    #     """CO2 concentration in mesophyll (ppm)"""
+        """CO2 concentration in mesophyll (ppm)"""
+        return CiNew(i)  
     #     return CiNew(i) - ((1.+VPD(Ta[i], qa[i])/Dxnew[species])*Cs[i])/(a1new[species]*gmgsratio[pType[species]])   
     def CcNew(i, z, M):
         """CO2 concentration in mesophyll cytosol resulting from malic acid decarboxylation (ppm)"""
@@ -558,10 +592,16 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
             Ta.append(TaStep(i))
             qa.append(qaNight)
         elif weatherOption == "ACTUAL":
-            Ta.append(taInp[i])
-            qa.append(qaInp[i])
+            # Ta.append(taInp[i])
+            # qa.append(qaInp[i])
+
+            Ta.append(taInp[int(i*timestepM/timestepD)])
+            qa.append(qaInp[int(i*timestepM/timestepD)])
              #Ta.append(taInp[int(i*timestepM/60)])
              #qa.append(qaInp[int(i*timestepM/60)])
+        elif weatherOption == "VPD":
+            Ta.append(TaStep(i))
+            qa.append(qaV(i, VPdiff))
         else: #weatherOption == "BLM"
              pass
         
@@ -621,6 +661,7 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
             pass
             
         Ana.append(An(phi(tch(i)), psi_ll[i], Tla[i], C1, i))
+        Aphicitla.append(AphiciTl(phi(tch(i)), C1, Tla[i]))
         Cs.append(CsNew(i))
         gsv.append(gsvNew(phi(tch(i)), Ta[i], psi_ll[i], qa[i], Tla[i], C1, i))
         Cbs.append(CbsNew(i, psi_ll[i]))
@@ -630,10 +671,11 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
             Ma.append(MNew(i, psi_ll[i], Cc[i], Tla[i], za[i], Ma[i]))
             za.append(zNew(phi(tch(i)), Ma[i], za[i], Tla[i])) 
             Asva.append(Asv(phi(tch(i)), Tla[i], psi_ll[i], za[i], Ma[i]))
-            Avca.append(Avc(phi(tch(i)), C1, Tla[i], za[i], Ma[i]))
-            Asca.append(Asc(phi(tch(i)), psi_ll[i], Tla[i], C1, i))
+            Avca.append(Avc(phi(tch(i)), Cc[i], Tla[i], za[i], Ma[i]))
+            Asca.append(Asc(phi(tch(i)), psi_ll[i], Tla[i], C1, za[i], Ma[i]))
             Rdca.append(Rdc(phi(tch(i)), Tla[i]))
             Rdva.append(Rdv(phi(tch(i)), Tla[i]))
+            MEa.append(MT(za[i], Ma[i], Tla[i], phi(tch(i))))
         else:
             pass
 
@@ -659,8 +701,8 @@ def run(species, sType, capOn, weatherOption, lightOption, rainOption, Duration,
         pass
 
     if pType[species] =="CAM" and capOn ==True:
-        output = np.transpose([gsv, [psi_s(x) for x in s], psi_ll, psi_atma, gpa, s, [x*24*3.6 for x in Ev], Tla, [x*24*3.6/1000 for x in Ana], qa, qia, [x/Vwt[species] for x in Vwa], VPDa, Ci, Cm, Cc, Ma, za, Asva, Avca, Asca, Rdca, Rdva])
-        output = pd.DataFrame(output, columns = ['gsv', 'psi_s', 'psi_ll', 'psi_atma', 'gp', 's', 'Ev', 'Tl', 'An', 'qa', 'qi', 'w', 'VPD', 'Ci', 'Cm', 'Cc', 'M', 'z', 'Asv', 'Avc', 'Asc', 'Rdc', 'Rdv'])
+        output = np.transpose([gsv, [psi_s(x) for x in s], psi_ll, psi_atma, gpa, s, [x*24*3.6 for x in Ev], Tla, [x*24*3.6/1000 for x in Ana], qa, qia, [x/Vwt[species] for x in Vwa], VPDa, Ci, Cm, Cc, [x/Mmax[species] for x in Ma], za, Asva, Avca, Asca, Rdca, Rdva, Aphicitla, [x*5/Mmax[species] for x in MEa]])
+        output = pd.DataFrame(output, columns = ['gsv', 'psi_s', 'psi_ll', 'psi_atma', 'gp', 's', 'Ev', 'Tl', 'An', 'qa', 'qi', 'w', 'VPD', 'Ci', 'Cm', 'Cc', 'M', 'z', 'Asv', 'Avc', 'Asc', 'Rdc', 'Rdv', 'Aphicitl', 'ME'])
     elif pType[species] =="CAM":
         output = np.transpose([gsv, [psi_s(x) for x in s], psi_ll, psi_atma, gpa, s, [x*24*3.6 for x in Ev], Tla, [x*24*3.6/1000 for x in Ana], qa, qia, VPDa, Ci, Cm, Cc, Ma, za])
         output = pd.DataFrame(output, columns = ['gsv', 'psi_s', 'psi_ll', 'psi_atma', 'gp', 's', 'Ev', 'Tl', 'An', 'qa', 'qi', 'VPD', 'Ci', 'Cm', 'Cc', 'M', 'z'])

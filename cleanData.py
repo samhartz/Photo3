@@ -15,18 +15,18 @@ import xlrd
 # data cannot contain gaps larger than 23 hours
 # Excel sheet containing data must not additional text beyond headers
 
-xl = pd.ExcelFile("Temple2.xls")
-data = xl.parse("Average")
+xl = pd.ExcelFile("sample_data/TempleApril2015.xlsx")
+data = xl.parse("Sheet1")
 
 # convert time array to simple vector of datenumbers
 timevecs = data[['Year', 'Month', 'Day', 'Hour', 'Minute']] 
 timestamps = pd.to_datetime(timevecs)
 newdf = data[['GHI', 'Temperature', 'Relative Humidity']].set_index(timestamps)
-converted = newdf.asfreq('10Min') #May change time increment here to match model timestepM
+converted = newdf.asfreq('30Min') #May change time increment here to match model timestepM
 converted = converted.interpolate()
 converted['GHI'].plot()
 plt.show()
 
-writer = pd.ExcelWriter('TempleAprilInterp1.xlsx')
+writer = pd.ExcelWriter('sample_data/TempleApril2015Interp30.xlsx')
 converted.to_excel(writer,'Sheet1')
 writer.save()
