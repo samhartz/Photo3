@@ -29,3 +29,7 @@ Solar data across the globe may be obtained from the [Helicolim-3 database by th
 Temperature and relative humidity data may be downloaded from the [Iowa Environmental Mesonet (IEM) network][iem], which also includes a link to a Python script for scraping data. Windspeed and precipitation is also available from this source. 
 
 [iem]: http://mesonet.agron.iastate.edu/request/download.phtml
+
+# Authorship
+
+The Photo3 model was created by Samantha Hartzell, Mark Bartlett, and Amilcare Porporato in the Princeton University Department of Civil and Environmental Engineering and the Princeton Environmental Institute.
