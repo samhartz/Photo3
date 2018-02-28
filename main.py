@@ -26,7 +26,7 @@ spVariable = tk.StringVar(value = "Triticum aestivum") # default value
 rainVariable = tk.StringVar(value = "Constant")
 weatherFile = tk.StringVar(value="sample_data\TempleAprilMay2015.xlsx") #default value for the location of the weather data
 repeatWeather = 1 #option to repeat the data in weatherFile x number of times...default value is 1 for no repeat
-resultsFile = tk.StringVar(value = 'sample_output\phenologyCAM') #default value for the location where results are saved
+resultsFile = tk.StringVar(value = 'sample_output\example') #default value for the location where results are saved
 
 capOptions = {"No": False, "Yes": True}
 speciesOptions = {"Triticum aestivum": "T. aest", "Sorghum bicolor": "S. bico", "Opuntia ficus-indica": "O. ficu"}
@@ -333,27 +333,22 @@ if phenologyOn==True:
     del pheDict['bmO'][-1]
     del pheDict['bmR'][-1]
 
-if pType[species] =="CAM" and capOn ==True:
-    output = np.transpose([gsv_a, [psi_s(sType, x) for x in s_a], psi_l_a, psi_atma, gp_a, s_a, [x*24*3.6 for x in ev_a], tl_a, [x*24*3.6/1000 for x in an_a], qa_a, qi_a, [x/vwt[species] for x in vw_a], vpd_a, ci_a, cm_a, cc_a, [x/Mmax[species] for x in m_a], z_a, pheDict['lai'], pheDict['zr'], pheDict['bmL'], pheDict['bmR'], pheDict['bmS'], pheDict['bmO']])
-    output = pd.DataFrame(output, columns = ['gsv', 'psi_s', 'psi_ll', 'psi_atma', 'gp', 's', 'Ev', 'Tl', 'An', 'qa', 'qi', 'w', 'VPD', 'Ci', 'Cm', 'Cc', 'M', 'z', 'lai', 'zr', 'bmL', 'bmR', 'bmS', 'bmO'])
-elif pType[species] =="CAM":
-    output = np.transpose([gsv_a, [psi_s(sType, x) for x in s_a], psi_l_a, psi_atma, gp_a, s_a, [x*24*3.6 for x in ev_a], tl_a, [x*24*3.6/1000 for x in an_a], qa_a, qi_a, vpd_a, ci_a, cm_a, cc_a, m_a, z_a])
-    output = pd.DataFrame(output, columns = ['gsv', 'psi_s', 'psi_ll', 'psi_atma', 'gp', 's', 'Ev', 'Tl', 'An', 'qa', 'qi', 'VPD', 'Ci', 'Cm', 'Cc', 'M', 'z'])
-elif capOn==True:
-    output = np.transpose([gsv_a, [psi_s(sType, x) for x in s_a], psi_l_a, psi_atma, gp_a, s_a, [x*24*3.6 for x in ev_a], tl_a, [x*24*3.6/1000 for x in an_a], qa_a, qi_a, [x/vwt[species] for x in vw_a], vpd_a, ci_a, cm_a])
-    output = pd.DataFrame(output, columns = ['gsv', 'psi_s', 'psi_ll', 'psi_atma', 'gp', 's', 'Ev', 'Tl', 'An', 'qa', 'qi', 'w', 'VPD', 'Ci', 'Cm'])
-else: 
-    # output = np.transpose([gsv_a, [psi_s(sType, x) for x in s_a], psi_l_a, psi_atma, gp_a, s_a, [x*24*3.6 for x in ev_a], tl_a, [x*24*3.6/1000 for x in an_a], qa_a, qi_a, vpd_a, ci_a, cm_a])
-    # output = pd.DataFrame(output, columns = ['gsv', 'psi_s', 'psi_ll', 'psi_atma', 'gp', 's', 'Ev', 'Tl', 'An', 'qa', 'qi', 'VPD', 'Ci', 'Cm'])
+#save data as DataFrame object
 
-    output = np.transpose([gsv_a, [psi_s(sType, x) for x in s_a], psi_l_a, psi_atma, gp_a, s_a, [x*24*3.6 for x in ev_a], tl_a, [x*24*3.6/1000 for x in an_a], qa_a, qi_a, vpd_a, ci_a, cm_a, pheDict['lai'], pheDict['zr'], pheDict['bmL'], pheDict['bmR'], pheDict['bmS'], pheDict['bmO']])
-    output = pd.DataFrame(output, columns = ['gsv', 'psi_s', 'psi_ll', 'psi_atma', 'gp', 's', 'Ev', 'Tl', 'An', 'qa', 'qi', 'VPD', 'Ci', 'Cm', 'lai', 'zr', 'bmL', 'bmR', 'bmS', 'bmO'])
-    #output = pd.DataFrame({'gsv':gsv_a, 'psi_l' : psi_l_a, 'gp': gp_a, 's':s_a, 'ev': ev_a, 'tl': tl_a, 'an': an_a, 'qa': qa_a, 'qi': qi_a,\
-    # 'vpd': vpd_a, 'ci':ci_a, 'cm': cm_a, 'lai': pheDict['lai'], 'zr': pheDict['zr'], 'bmL': pheDict['bmL'], 'bmS': pheDict['bmS'], \
-    # 'bmO': pheDict['bmO']}, columns = columns)
-
-data =output
-#Save data as DataFrame object
+output = {'gsv':gsv_a, 'psi_l' : psi_l_a, 'gp': gp_a, 's':s_a, 'ev': ev_a, 'tl': tl_a, 'an': an_a, 'qa': qa_a, 'qi': qi_a,}
+if pType[species] == "CAM":
+    output['m'] = m_a
+    output['z'] = z_a
+if capOn ==True:
+    output['w'] = [x/vwt[species] for x in vw_a]
+if phenologyOn==True:
+    output['lai'] = pheDict['lai']
+    output['zr'] = pheDict['zr']
+    output['bmL'] = pheDict['bmL']
+    output['bmR'] = pheDict['bmR']
+    output['bmS'] = pheDict['bmS']
+    output['bmO'] = pheDict['bmO']
+data = pd.DataFrame.from_dict(output)
 data.to_pickle(resultsFile.get())
 #Save data as csv file
 #data.to_csv(resultsFile.get())
