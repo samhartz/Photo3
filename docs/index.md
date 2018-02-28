@@ -3,7 +3,7 @@ The Photo3 model describes C3, C4, and CAM photosynthesis in a consistent manner
 
 # Model Structure
 
-To run the model, simply run the file engine.py. A graphical user interface will display allowing the user to choose a plant species, soil type, soil moisture, duration of the simulation, and a data file containing weather inputs (solar radiation, temperature, and humidity). The engine.py file then calls the file model.py to generate the results, which it then exports and/or plots for the user. 
+To run the model, simply run the file main.py. A graphical user interface will display allowing the user to choose a plant species, soil type, soil moisture, duration of the simulation, and a data file containing weather inputs (solar radiation, temperature, and humidity). The results are then generated and exported to the selected folder as a pandas dataframe. 
 
 The sample_data folder contains sample weather inputs for a location in Temple, TX, and the sample_output folder contains results from a few simulations in this area. An academic article describing the model details is currently under review.
 
