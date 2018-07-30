@@ -5,7 +5,8 @@ The Photo3 model describes C3, C4, and CAM photosynthesis in a consistent manner
 
 To run the model, simply run the file main.py (this script depends on functions.py and dictionaries.py (which stores the dictionaries and variables)). A graphical user interface will display allowing the user to choose a plant species, soil type, soil moisture, duration of the simulation, and a data file containing weather inputs (solar radiation, temperature, and humidity). Results will be exported to the file location chosen in the user interface, and/or may be viewed directly from the command prompt or IDE. 
 
-The sample_data folder contains sample weather inputs for a location in Temple, TX, and the sample_output folder contains results from a few simulations in this area. An academic article describing the model details is currently under review.
+The sample_data folder contains sample weather inputs for a location in Temple, TX, and the sample_output folder contains results from a few simulations in this area. An academic article describing the model details is available in Ecological Modelling:
+  Hartzell, S., Bartlett, M.S. and A. Porporato (2018) Unified representation of the C3, C4, and CAM photosynthetic pathways with the       Photo3 model. Ecological Modelling, doi: 10.1016/j.ecolmodel.2018.06.012.
 
 # Model requirements
 Photo3 was developed in Python 2.7 with the following packages: SciPy, NumPy, Pandas, Tkinter, Matplotlib. We suggest intalling a Python distribution such as [Anaconda][An] to meet these requirements.
