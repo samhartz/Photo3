@@ -1,7 +1,5 @@
 from scipy.optimize import fsolve
 from sympy import *
-import Tkinter as tk
-import tkFileDialog
 import numpy as np
 import pandas as pd
 from math import exp, pi, sqrt, log
@@ -9,17 +7,23 @@ import matplotlib.pyplot as plt
 from dics import *
 from functions import *
 from defs import *
+import importlib as importlib
+import gui
+importlib.reload(gui)
 import gui as gui
 
-duration = 10
+#duration = 1
+#weatherFile = "sample_data\ConsoliInterp.xlsx"
+# resultsFile = 'sample_output/testgui' # default value for the location where results are saved
+
 timestepM = 30 # Model change in time at each step (min)
 timestepD = 30 # timestep of input data 
 dt = timestepM*60. # no. of seconds in timestep, used to advance differential equations
 
+duration = gui.duration
 weatherFile = gui.weatherLoc
 resultsFile = gui.resultsLoc
-#weatherFile = "sample_data\ConsoliInterp.xlsx"
-# resultsFile = 'sample_output/testgui' # default value for the location where results are saved
+
 df = pd.read_excel(weatherFile)
 tempC = df['Temperature']
 taInp = tempC + 273. # convert to K
@@ -30,13 +34,15 @@ qaInp = list(qaInp.values)
 taInp = list(taInp.values)
 phiInp = list(df['GHI'].values)  # extracts global solar radiation column from Excel Worksheet in W/m^2
 
+#need to implement different soil behaviors in GUI
 
 #use with GUI
 sinit = gui.s0
 vwi  = 0.9 # initial water content, as a %
 species = gui.species()
 atmosphere = Atmosphere(phiInp[0], taInp[0], qaInp[0])
-soil = Soil(gui.sType(), species.ZR, sinit)
+#soil = Soil(gui.sType(), DrydownSoil(), species.ZR, sinit)
+soil = Soil(gui.sType(), gui.soilDynamics, species.ZR, sinit)
 photo = species.PTYPE(species, atmosphere)
 hydro = gui.hydrology(species, atmosphere, soil, photo, vwi)
 
@@ -60,20 +66,15 @@ results = plant.output()
 
 
 data = pd.DataFrame.from_dict(results)
-# Save data as pandas file
 data.to_pickle(resultsFile)
-
-#OR
-
 # Save data as csv file
 data.to_csv(resultsFile)
 
-
 #Plot results
-startDay = 0
+startDay = 2
 endDay = duration
 dispDuration = endDay-startDay
-daySteps = 60/timestepM*24
+daySteps = 60//timestepM*24
 timevec = np.linspace(0,duration,duration*daySteps)
 timevecHr = np.linspace(0,duration*24,duration*daySteps)
 
@@ -82,9 +83,9 @@ plt.title("Soil moisture")
 plt.xlabel("time (d)")
 plt.ylabel("s (-)")
 plt.plot(timevec[0:daySteps*dispDuration], results['s'][daySteps*startDay:daySteps*endDay])
-for i in range(0, duration):
+for i in range(0, dispDuration):
 	plt.axvspan(i-0.25, i+0.25, facecolor = 'k', alpha = 0.2)
-plt.xlim(0, duration)
+plt.xlim(0, dispDuration)
 #plt.xticks([0.,6.,12.,18.,24.])
 #plt.legend()
 anp.show()
@@ -95,9 +96,9 @@ plt.title("Leaf water potential")
 plt.xlabel("time (d)")
 plt.ylabel("psi_l (MPa)")
 plt.plot(timevec[0:daySteps*dispDuration], results['psi_l'][daySteps*startDay:daySteps*endDay])
-for i in range(0, duration):
+for i in range(0, dispDuration):
 	plt.axvspan(i-0.25, i+0.25, facecolor = 'k', alpha = 0.2)
-plt.xlim(0, duration)
+plt.xlim(0, dispDuration)
 #plt.xticks([0.,6.,12.,18.,24.])
 #plt.legend()
 anp.show()
@@ -108,22 +109,9 @@ plt.xlabel("time (d)")
 plt.ylabel("An (umol/m2/s)")
 plt.plot(timevec[0:daySteps*dispDuration], results['a'][daySteps*startDay:daySteps*endDay])
 #plt.axvspan(0., 0.25, facecolor = 'k', alpha = 0.3)
-for i in range(0, duration):
+for i in range(0, dispDuration):
 	plt.axvspan(i-0.25, i+0.25, facecolor = 'k', alpha = 0.2)
-plt.xlim(0, duration)
-#plt.xticks([0.,6.,12.,18.,24.])
-#plt.legend()
-anp.show()
-
-anp = plt.figure()
-plt.title("Transpiration")
-plt.xlabel("time (d)")
-plt.ylabel("E (mm/d)")
-plt.plot(timevec[0:daySteps*dispDuration], [x*3.6*24 for x in results['ev'][daySteps*startDay:daySteps*endDay]])
-#plt.axvspan(0., 0.25, facecolor = 'k', alpha = 0.3)
-for i in range(0, duration):
-	plt.axvspan(i-0.25, i+0.25, facecolor = 'k', alpha = 0.2)
-plt.xlim(0, duration)
+plt.xlim(0, dispDuration)
 #plt.xticks([0.,6.,12.,18.,24.])
 #plt.legend()
 anp.show()
