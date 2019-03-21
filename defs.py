@@ -26,7 +26,7 @@ class Simulation(object):
 
 class Soil(object):
 	EVMAX = 1.
-	def __init__(self, stype, zr, s):
+	def __init__(self, stype, dynamics, zr, s):
 		self.PSI_SS = stype.PSI_SS
 		self.B = stype.B
 		self.KS = stype.KS
@@ -35,11 +35,15 @@ class Soil(object):
 		self.ZR = zr
 		self.s = s
 		self.s_a = []
+		self.psi_s_a = []
+		self.dynamics = dynamics
 	def update(self, dt, zr, qs):
-		self.s = (dt/(self.N*zr*10.**6)*(-qs - (self.evap(self.s)*1000.)/(24.*60*60)- self.leak(self.s))) + self.s
+		self.s = self.dynamics.snew(self, dt, zr, qs)
+		#self.s = (dt/(self.N*zr*10.**6)*(-qs - (self.evap(self.s)*1000.)/(24.*60*60)- self.leak(self.s))) + self.s
 		self.s_a.append(self.s)
+		self.psi_s_a.append(self.psi_s(self.s))
 	def output(self):
-		return {'s': self.s_a}
+		return {'s': self.s_a, 'psi_s': self.psi_s_a}
 	def leak(self, s):
 	    """Leakage (um/s) """    
 	    try:
@@ -56,6 +60,43 @@ class Soil(object):
 	        return self.EVMAX*(s - self.SH)/(1. - self.SH)
 	    else:
 	        return 0.
+
+class DrydownSoil(object):
+	def __init__(self):
+		pass
+	def snew(self, soil, dt, zr, qs):
+		return (dt/(soil.N*zr*10.**6)*(-qs - (soil.evap(soil.s)*1000.)/(24.*60*60)- soil.leak(soil.s))) + soil.s
+
+class ConstantSoil(object):
+	def __init__(self):
+		pass
+	def snew(self, soil, dt, zr, qs):
+		return soil.s
+
+class StochasticSoil(object):
+	"""takes alpha in cm, lda in 1/d"""
+	def __init__(self, alpha, lda):
+		self.alpha = alpha
+		self.lambda_r = lda
+	def rain(self, dt, gamma):
+		if np.random.random() > self.lambda_r*dt/(3600.*24.):
+			return 0.
+		else:
+			return np.random.exponential(1./gamma)
+	def sLoss(self, soil, dt, zr, qs):
+		return (dt/(soil.N*zr*10.**6)*(-qs - (soil.evap(soil.s)*1000.)/(24.*60*60)- soil.leak(soil.s))) + soil.s
+	def snew(self, soil, dt, zr, qs):
+		gamma = (soil.N*zr*100.)/self.alpha; #Normalized Depth of Rainfall
+		return min(1., self.sLoss(soil, dt, zr, qs) + self.rain(dt, gamma))
+
+class RainSoil(object):
+	def __init__(self):
+		pass
+	def sLoss(self, soil, dt, zr, qs):
+		return (dt/(soil.N*zr*10.**6)*(-qs - (soil.evap(soil.s)*1000.)/(24.*60*60)- soil.leak(soil.s))) + soil.s
+	def snew():
+		return min(1., self.sLoss(soil, dt, zr, qs) + self.rain(dt, gamma))
+
 class SaltySoil(Soil):
 	TS = 293. # soil water temp (K)
 	IV = 2. # van't hoff coefficient for NaCl
@@ -136,7 +177,6 @@ class Atmosphere(object):
 class Photo(object):
 
 	TO = 293.2 # Reference Temperature for photosynthetic parameters (K)
-	KAPPA_2 = .3 # Quantum yield of photosynthesis (mol CO2/mol photon)
 	GAMMA_1 = .0451 # Parameter for temp dependence of CO2 compensation point (1/K)
 	GAMMA_2 = .000347 # Parameter for temp dependence of CO2 compensation point (1/K^2)
 	KC0 = 302. # Michaelis constant for C02 at TO (umol/mol)
@@ -163,6 +203,7 @@ class Photo(object):
 		self.PSILA0 = species.PSILA0
 		self.PSILA1 = species.PSILA1
 		self.ared = 1.
+		self.light_atten = 1.
 
 	def a_c(self, ci, tl, ared):
 	    """Rubisco-limited photosynthetic rate (umol/(m^2s^1))"""
@@ -178,7 +219,7 @@ class Photo(object):
 		return self.KC0*exp(self.HKC/(R*self.TO)*(1. - self.TO/tl))
 	def a_q(self, phi, ci, tl):
 	    """Light-limited photosynthetic rate (umol/(m^2s^1))"""
-	    return (self.j(phi, tl)*(ci - self.gamma(tl)))/(4.*(ci + 2.*self.gamma(tl)))
+	    return (self.j(phi*self.light_atten, tl)*(ci - self.gamma(tl)))/(4.*(ci + 2.*self.gamma(tl)))
 	def gamma(self, tl):
 	    """CO2 compensation point (umol/mol)"""
 	    return self.GAMMA_0*(1. + self.GAMMA_1*(tl - self.TO) + self.GAMMA_2*(tl - self.TO)**2.);
@@ -233,19 +274,21 @@ class C3(Photo):
 	GAMMA_0 = 34.6
 	RC = 0.7
 	GMGSRATIO = 1.65
+
+	KAPPA_2 = .3 # Quantum yield of photosynthesis (mol CO2/mol photon) 
 	def __init__(self, species, atm):
 		Photo.__init__(self, "C3", species)
 		self.ca = atm.ca
 		self.cs = atm.ca
-	 	self.ci = self.ciNew(atm.cs, atm.ta, atm.qa)
-	 	self.cm = self.cmNew(atm.cs, atm.ta, atm.qa)
-	 	self.cx = self.cm
-	 	self.a_a = []
+		self.ci = self.ciNew(atm.cs, atm.ta, atm.qa)
+		self.cm = self.cmNew(atm.cs, atm.ta, atm.qa)
+		self.cx = self.cm
+		self.a_a = []
 	def update(self, atm, psi_l, tl, dt):
-	 	self.ci = self.ciNew(self.cs, atm.ta, atm.qa)
-	 	self.cm = self.cmNew(self.cs, atm.ta, atm.qa)
-	 	self.a = self.an(atm.phi, psi_l, tl, self.cm, self.ared)
-	 	self.a_a.append(self.a)
+		self.ci = self.ciNew(self.cs, atm.ta, atm.qa)
+		self.cm = self.cmNew(self.cs, atm.ta, atm.qa)
+		self.a = self.an(atm.phi, psi_l, tl, self.cm, self.ared)
+		self.a_a.append(self.a)
 	def output(self):
 		return {'a': self.a_a}
 	def an(self, phi, psi_l, tl, ci, ared): 
@@ -261,15 +304,17 @@ class C4(Photo):
 	VPMAX0 = 120. # Maximum PEP carboxylase under well-watered conditions (umol/(m^2s))
 	VPR = 80. # PEP regeneration rate (umol/(m^2s))
 	KP = 80. # Michaelis-Menten coefficient for C4 species (umol/(mol))
+
+	KAPPA_2 = .3 # Quantum yield of photosynthesis (mol CO2/mol photon) 
 	def __init__(self, species, atm):
 		Photo.__init__(self, "C4", species)
 		self.ca = atm.ca
 		self.cs = atm.ca
-	 	self.ci = self.ciNew(atm.cs, atm.ta, atm.qa)
-	 	self.cm = self.cmNew(atm.cs, atm.ta, atm.qa)
-	 	self.cbs = self.cm
-	 	self.cx = self.cbs
-	 	self.a_a = []
+		self.ci = self.ciNew(atm.cs, atm.ta, atm.qa)
+		self.cm = self.cmNew(atm.cs, atm.ta, atm.qa)
+		self.cbs = self.cm
+		self.cx = self.cbs
+		self.a_a = []
 
 	def update(self, atm, psi_l, tl, dt):
 		self.ci = self.ciNew(self.cs, atm.ta, atm.qa)
@@ -313,6 +358,9 @@ class CAM(Photo):
 	M0 = 0. # Initial Malic Acid Carbon Concentration (umol/m^3)
 	TH = 302.65 # High temperature for CAM model (K)
 	TW = 283.15 # Low temperature for CAM model (K)
+
+	KAPPA_2 = .1 # Quantum yield of photosynthesis (mol CO2/mol photon) (note that this overrides the value of 0.3 for typical photosynthesis)
+
 	def __init__(self, species, atm):
 		Photo.__init__(self, "CAM", species)
 		self.MMAX = species.MMAX
@@ -326,6 +374,8 @@ class CAM(Photo):
 		self.cc = self.ccNew(self.cs, atm.ta, atm.qa, self.z, self.m)
 		self.cx = self.cc
 		self.a_a = []
+		self.z_a = []
+		self.m_a = []
 		
 	def update(self, atm, psi_l, tl, dt):
 		self.ci = self.ciNew(self.cs, atm.ta, atm.qa)
@@ -335,10 +385,12 @@ class CAM(Photo):
 		self.z = self.zNew(atm.phi, self.m, self.z, tl, dt) 
 		self.m = self.mNew(atm.phi, psi_l, self.cc, tl, self.z, self.m, dt)
 		self.a = self.an(atm.phi, psi_l, tl, self.cc, self.ared)
+		self.z_a.append(self.z)
+		self.m_a.append(self.m)
 		self.a_a.append(self.a)
 
 	def output(self):
-		return {'a': self.a_a}
+		return {'a': self.a_a, 'z': self.z_a, 'm': self.m_a}
 
 	def a_sc(self, phi, psi_l, tl, ci, z, m, ared):
 	    """Flux from stomata to Calvin cycle (umol/(m^2s))"""
@@ -418,6 +470,8 @@ class Hydro(object):
 	    except OverflowError:
 	        ans = 0.
 	    return ans
+
+	    #return .622*esat(tl)/P_ATM*exp(psi_l*1000000.*VW/R/tl)
 	def gpf(self, psi_l):
 	    """Plant conductance, per unit leaf area (um/(s-MPa))"""
 	    if psi_l<-10:
@@ -524,15 +578,225 @@ class HydroCap(Hydro):
 	    psi_l, tl = params
 	    psi_w = self.psi_wf(vw)
 	    if lai < 1.: # assumes only a portion of solar radiation is absorbed by crops
-			return (phi*lai - self.shf(tl, ta, lai) -LAMBDA_W*RHO_W*self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)/1000000.,  \
-	            self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)\
-		           -(self.gsrfp(soil, s, gp, lai, zr)*(soil.psi_s(s) - psi_l) + lai*self.gwf(psi_w)*(psi_w - psi_l))/ \
-		           (1. + (self.gsrfp(soil, s, gp, lai, zr)*(1. - self.F_CAP))/(lai*gp) + (self.gwf(psi_w)*(1. - self.F_CAP))/gp))
+		    return (phi*lai - self.shf(tl, ta, lai) -LAMBDA_W*RHO_W*self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)/1000000.,  \
+		    	self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)\
+		    	-(self.gsrfp(soil, s, gp, lai, zr)*(soil.psi_s(s) - psi_l) + lai*self.gwf(psi_w)*(psi_w - psi_l))/ \
+		    	(1. + (self.gsrfp(soil, s, gp, lai, zr)*(1. - self.F_CAP))/(lai*gp) + (self.gwf(psi_w)*(1. - self.F_CAP))/gp))
 	    else:
-			return (phi - self.shf(tl, ta, lai) -LAMBDA_W*RHO_W*self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)/1000000., 
-		        self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)
-		           -(self.gsrfp(soil, s, gp, lai, zr)*(soil.psi_s(s) - psi_l) + lai*self.gwf(psi_w)*(psi_w - psi_l))/
-		           (1. + (self.gsrfp(soil, s, gp, lai, zr)*(1. - self.F_CAP))/(lai*gp) + (self.gwf(psi_w)*(1. - self.F_CAP))/gp))
+	    	return (phi - self.shf(tl, ta, lai) -LAMBDA_W*RHO_W*self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)/1000000., 
+	    		self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)
+				-(self.gsrfp(soil, s, gp, lai, zr)*(soil.psi_s(s) - psi_l) + lai*self.gwf(psi_w)*(psi_w - psi_l))/
+				(1. + (self.gsrfp(soil, s, gp, lai, zr)*(1. - self.F_CAP))/(lai*gp) + (self.gwf(psi_w)*(1. - self.F_CAP))/gp))
+
+class HydroLeafCap(Hydro):
+	F_CAP = 0.5
+	def __init__(self, species, atm, soil, photo, vwi, vli, lcap, vlt, gleaf):
+		Hydro.__init__(self, species)
+		self.GWMAX = species.GWMAX
+		self.VWT = species.VWT
+		self.CAP = species.CAP
+		self.LCAP = lcap
+		self.GLMAX = gleaf
+		self.VLT = vlt
+		self.vl = vli*self.VLT
+		self.vw = vwi*self.VWT
+		self.psi_l = self.psi_hf(self.vl)
+		self.psi_w = self.psi_wf(self.vw)
+
+		self.psi_2, self.tl = fsolve(self.fBal, (-1., 290.), args= (soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr, self.vw, self.vl))
+		self.psi_1 = self.psi_1f(self.psi_w, self.psi_2, self.gp, soil, self.lai)
+		self.ev = self.evf(photo, atm.phi, atm.ta, self.psi_l, atm.qa, self.tl, photo.cx, self.lai, photo.ared, self.psi_2)
+		self.vw_a = []
+		self.vl_a = []
+		self.qs_a = []
+		self.qw_a = []
+		self.ql_a = []
+		self.psi_1_a = []
+		self.psi_2_a = []
+		self.psi_w_a = []
+
+	def update(self, atm, soil, photo, dt):
+		# self.vw = self.vwf(self.vw, self.psi_1, dt)
+		# self.vl = self.vlf(self.vl, self.psi_l, self.psi_2, dt)
+		# self.psi_w = self.psi_wf(self.vw)
+		# self.psi_l = self.psi_lf(self.vl)
+		# self.psi_2, self.tl = fsolve(self.fBal, (-1., 290.), args= (soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr, self.vw, self.vl))
+		# self.psi_1 = self.psi_1f(self.psi_l, self.psi_w, self.psi_2, self.gp, soil)
+		self.gp = self.gpf(self.psi_l)
+		self.ev = self.evf(photo, atm.phi, atm.ta, self.psi_l, atm.qa, self.tl, photo.cx, self.lai, photo.ared, self.psi_2)
+		self.qs = self.qsf(self.vw, self.vl, self.ev, self.psi_l, self.psi_1, self.psi_2, self.lai, dt)
+		self.psi_l_a.append(self.psi_l)
+		self.gp_a.append(self.gp)
+		self.gsv_a.append(self.gsw(photo, atm.phi, atm.ta, self.psi_l, atm.qa, self.tl, photo.cx, photo.ared))
+		self.tl_a.append(self.tl) 
+		self.ev_a.append(self.ev)
+		self.vw_a.append(self.vw)
+		self.vl_a.append(self.vl)
+		self.qs_a.append(self.qs)
+		self.psi_1_a.append(self.psi_1)
+		self.psi_2_a.append(self.psi_2)
+		self.psi_w_a.append(self.psi_w)
+		self.qw_a.append(self.qwf(self.vw, self.psi_1, self.lai, dt))
+		self.ql_a.append(self.qlf(self.vl, self.psi_l, self.psi_2, self.lai, dt))
+		self.vw = self.vwf(self.vw, self.psi_1, dt)
+		self.vl = self.vlf(self.vl, self.psi_l, self.psi_2, dt)
+		self.psi_w = self.psi_wf(self.vw)
+		self.psi_l = self.psi_hf(self.vl)
+		self.psi_2, self.tl = fsolve(self.fBal, (-1., 290.), args= (soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr, self.vw, self.vl))
+		self.psi_1 = self.psi_1f(self.psi_w, self.psi_2, self.gp, soil, self.lai)
+
+	def output(self):
+		return {'psi_l': self.psi_l_a, 'gp': self.gp_a, 'gsv': self.gsv_a, 'tl': self.tl_a, 'ev': self.ev_a, 'vw': self.vw_a, 'vl' :self.vl_a, 'qs':self.qs_a, 'qw':self.qw_a, 'qs':self.qs_a, 'psi_1':self.psi_1_a, 'psi_2':self.psi_2_a, 'psi_w':self.psi_w_a}
+
+	def psi_wf(self, vw): 
+	    """Water potential of stored water (MPa)"""
+	    return (1./self.CAP)*vw/self.VWT - (1./self.CAP)
+	def psi_hf(self, vl):
+		"""Water potential of stored leaf water (MPa)"""
+		return (1./self.LCAP)*vl/self.VLT - (1./self.LCAP)
+	def gl_f(self, psi_l):
+		"""Leaf hydraulic conductance (um/MPa/s)"""
+		return self.GLMAX*exp(-(-psi_l/2.)**2.)
+	def psi_1f(self, psi_w, psi_2, gp, soil, lai):
+		"""Water potential at connection node 1 (lower node) (MPa)"""
+		return (psi_2*self.gfp(gp)*lai + psi_w*self.gwf(psi_w)*lai + soil.psi_s(soil.s)*self.gsrfp(soil, soil.s, gp, self.lai, self.zr))/(self.gfp(gp)*lai + self.gwf(psi_w)*lai + self.gsrfp(soil, soil.s, gp, self.lai, self.zr))
+	def vwf(self, vw, psi_1, dt):
+	    """Stored water volume, per unit leaf area (m3/m2)"""
+	    return max(min(vw - self.gwf(self.psi_wf(vw))*(self.psi_wf(vw)-psi_1)*dt/10.**6, self.VWT), 0.)
+	def vlf(self, vl, psi_l, psi_2, dt):
+		return max(min(vl - self.gl_f(psi_l)*(psi_l-psi_2)*dt/10.**6, self.VLT), 0.)
+	def qwf(self, vw, psi_1, lai, dt):
+	    """Stored water flux, per unit ground area"""
+	    return (vw - self.vwf(vw, psi_1, dt))*lai*10.**6/dt
+	def qlf(self, vl, psi_l, psi_2, lai, dt):
+	    """Stored water flux, per unit ground area"""
+	    return (vl - self.vlf(vl, psi_l, psi_2, dt))*lai*10.**6/dt
+	def qsf(self, vw, vl, ev, psi_l, psi_1, psi_2, lai, dt):
+	    """Soil water flux, per unit ground area"""
+	    return ev - self.qwf(vw, psi_1, lai, dt) - self.qlf(vl, psi_l, psi_2, lai, dt)
+	def gwf(self, psi_w):
+		"""Xylem-storage conductance, per unit leaf area (um/(MPa-s))"""
+		return self.GWMAX*exp(-(-psi_w/2.)**2.)
+	    #return GWMAX[species]*(vw/VWT[species])**4. 
+	def gsrfp(self, soil, s, gp, lai, zr):
+	    """Soil-root-plant fraction conductance, per unit ground area (um/(s-MPa))"""
+	    return (lai*self.gsr(soil, s, zr)*gp/self.F_CAP)/(self.gsr(soil, s, zr) +  lai*gp/self.F_CAP)
+	def gfp(self, gp):
+		return gp/(1. - self.F_CAP)
+	def fBal(self, params, soil, photo, phi, ta, qa, c1, s, lai, gp, ared, zr, vw, vl):
+	    psi_2, tl = params
+	    psi_w = self.psi_wf(vw)
+	    psi_l = self.psi_hf(vl)
+	    return (phi - self.shf(tl, ta, lai) -LAMBDA_W*RHO_W*self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared, psi_2)/1000000., 
+
+		    self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared, psi_2)
+		     -(psi_l-psi_2)*self.gl_f(psi_l)*lai - (self.psi_1f(psi_w, psi_2, gp, soil, lai)-psi_2)*self.gfp(gp)*lai)
+
+	def evf(self, photo, phi, ta, psi_l, qa, tl, ci, lai, ared, psi_2):
+	    """Transpiration, per unit ground area (um/sec)"""
+	    return max(lai*(1./(self.gsw(photo, phi, ta, psi_l, qa, tl, ci, ared)*R*ta/P_ATM*1000000.)+1./(self.GA*1000.))**(-1.)\
+	    *RHO_A/RHO_W*(self.qi(tl, psi_2)-qa), 0.)
+
+class HydroLeafCapOld(Hydro):
+	F_CAP = 0.5
+	def __init__(self, species, atm, soil, photo, vwi, vli, lcap, vlt, gleaf):
+		Hydro.__init__(self, species)
+		self.GWMAX = species.GWMAX
+		self.VWT = species.VWT
+		self.CAP = species.CAP
+		self.LCAP = lcap
+		self.GLMAX = gleaf
+		self.VLT = vlt
+		self.vl = vli*self.VLT
+		self.vw = vwi*self.VWT
+		self.psi_h = self.psi_hf(self.vl)
+		self.psi_w = self.psi_wf(self.vw)
+		self.psi_l, self.tl = fsolve(self.fBal, (-1., 290.), args= (soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr, self.vw, self.vl))
+		self.psi_1 = self.psi_1f(self.psi_w, self.psi_l, self.gp, soil, self.lai)
+		self.ev = self.evf(photo, atm.phi, atm.ta, self.psi_l, atm.qa, self.tl, photo.cx, self.lai, photo.ared)
+		self.vw_a = []
+		self.vl_a = []
+		self.qs_a = []
+		self.qw_a = []
+		self.psi_1_a = []
+		self.psi_h_a = []
+		self.psi_w_a = []
+
+	def update(self, atm, soil, photo, dt):
+		# self.vw = self.vwf(self.vw, self.psi_1, dt)
+		# self.vl = self.vlf(self.vl, self.psi_l, self.psi_2, dt)
+		# self.psi_w = self.psi_wf(self.vw)
+		# self.psi_l = self.psi_lf(self.vl)
+		# self.psi_2, self.tl = fsolve(self.fBal, (-1., 290.), args= (soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr, self.vw, self.vl))
+		# self.psi_1 = self.psi_1f(self.psi_l, self.psi_w, self.psi_2, self.gp, soil)
+		self.gp = self.gpf(self.psi_l)
+		self.ev = self.evf(photo, atm.phi, atm.ta, self.psi_l, atm.qa, self.tl, photo.cx, self.lai, photo.ared)
+		self.qs = self.qsf(self.vw, self.vl, self.ev, self.psi_l, self.psi_1, self.psi_h, self.lai, dt)
+		self.psi_l_a.append(self.psi_l)
+		self.gp_a.append(self.gp)
+		self.gsv_a.append(self.gsw(photo, atm.phi, atm.ta, self.psi_l, atm.qa, self.tl, photo.cx, photo.ared))
+		self.tl_a.append(self.tl) 
+		self.ev_a.append(self.ev)
+		self.vw_a.append(self.vw)
+		self.vl_a.append(self.vl)
+		self.qs_a.append(self.qs)
+		self.psi_1_a.append(self.psi_1)
+		self.psi_h_a.append(self.psi_h)
+		self.psi_w_a.append(self.psi_w)
+		self.qw_a.append(self.qwf(self.vw, self.psi_1, self.lai, dt))
+		self.vw = self.vwf(self.vw, self.psi_1, dt)
+		self.vl = self.vlf(self.vl, self.psi_h, self.psi_l, dt)
+		self.psi_w = self.psi_wf(self.vw)
+		self.psi_h = self.psi_hf(self.vl)
+		self.psi_l, self.tl = fsolve(self.fBal, (-1., 290.), args= (soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr, self.vw, self.vl))
+		self.psi_1 = self.psi_1f(self.psi_w, self.psi_l, self.gp, soil, self.lai)
+
+	def output(self):
+		return {'psi_l': self.psi_l_a, 'gp': self.gp_a, 'gsv': self.gsv_a, 'tl': self.tl_a, 'ev': self.ev_a, 'vw': self.vw_a, 'vl' :self.vl_a, 'qs':self.qs_a, 'qw':self.qw_a, 'psi_1':self.psi_1_a, 'psi_h':self.psi_h_a, 'psi_w':self.psi_w_a}
+
+	def psi_wf(self, vw): 
+	    """Water potential of stored water (MPa)"""
+	    return (1./self.CAP)*vw/self.VWT - (1./self.CAP)
+	def psi_hf(self, vl):
+		"""Water potential of stored leaf water (MPa)"""
+		return (1./self.LCAP)*vl/self.VLT - (1./self.LCAP)
+	def gl_f(self, psi_l):
+		"""Leaf hydraulic conductance (um/MPa/s)"""
+		return self.GLMAX*exp(-(-psi_l/2.)**2.)
+	def psi_1f(self, psi_w, psi_l, gp, soil, lai):
+		"""Water potential at connection node 1 (lower node) (MPa)"""
+		return (psi_l*self.gfp(gp)*lai + psi_w*self.gwf(psi_w)*lai + soil.psi_s(soil.s)*self.gsrfp(soil, soil.s, gp, self.lai, self.zr))/(self.gfp(gp)*lai + self.gwf(psi_w)*lai + self.gsrfp(soil, soil.s, gp, self.lai, self.zr))
+	def vwf(self, vw, psi_1, dt):
+	    """Stored water volume, per unit leaf area (m3/m2)"""
+	    return max(min(vw - self.gwf(self.psi_wf(vw))*(self.psi_wf(vw)-psi_1)*dt/10.**6, self.VWT), 0.)
+	def vlf(self, vl, psi_h, psi_l, dt):
+		return max(min(vl - self.gl_f(psi_l)*(psi_h-psi_l)*dt/10.**6, self.VLT), 0.)
+	def qwf(self, vw, psi_1, lai, dt):
+	    """Stored water flux, per unit ground area"""
+	    return (vw - self.vwf(vw, psi_1, dt))*lai*10.**6/dt
+	def qlf(self, vl, psi_h, psi_l, lai, dt):
+	    """Stored water flux, per unit ground area"""
+	    return (vl - self.vlf(vl, psi_h, psi_l, dt))*lai*10.**6/dt
+	def qsf(self, vw, vl, ev, psi_l, psi_1, psi_h, lai, dt):
+	    """Soil water flux, per unit ground area"""
+	    return ev - self.qwf(vw, psi_1, lai, dt) - self.qlf(vl, psi_h, psi_l, lai, dt)
+	def gwf(self, psi_w):
+		"""Xylem-storage conductance, per unit leaf area (um/(MPa-s))"""
+		return self.GWMAX*exp(-(-psi_w/2.)**2.)
+	    #return GWMAX[species]*(vw/VWT[species])**4. 
+	def gsrfp(self, soil, s, gp, lai, zr):
+	    """Soil-root-plant fraction conductance, per unit ground area (um/(s-MPa))"""
+	    return (lai*self.gsr(soil, s, zr)*gp/self.F_CAP)/(self.gsr(soil, s, zr) +  lai*gp/self.F_CAP)
+	def gfp(self, gp):
+		return gp/(1. - self.F_CAP)
+	def fBal(self, params, soil, photo, phi, ta, qa, c1, s, lai, gp, ared, zr, vw, vl):
+	    psi_l, tl = params
+	    psi_w = self.psi_wf(vw)
+	    psi_h = self.psi_hf(vl)
+	    return (phi - self.shf(tl, ta, lai) -LAMBDA_W*RHO_W*self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)/1000000., 
+		    self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)
+		     -(psi_h-psi_l)*self.gl_f(psi_l)*lai - ((psi_l*self.gfp(gp)*lai + psi_w*self.gwf(psi_w)*lai + soil.psi_s(soil.s)*self.gsrfp(soil, soil.s, gp, self.lai, self.zr))\
+		     /(self.gfp(gp)*lai+self.gwf(psi_w)*lai+self.gsrfp(soil, soil.s, gp, self.lai, self.zr))-psi_l)*self.gfp(gp)*lai)
 
 class Halophyte(Hydro):
 	F_CAP = 0.5
@@ -601,15 +865,15 @@ class Halophyte(Hydro):
 	def fBal(self, params, soil, photo, phi, ta, qa, c1, s, lai, gp, ared, zr, psi_w):
 	    psi_l, tl = params
 	    if lai < 1.: # assumes only a portion of solar radiation is absorbed by crops
-			return (phi*lai - self.shf(tl, ta, lai) -LAMBDA_W*RHO_W*self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)/1000000.,  \
-	            self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)\
-		           -(self.gsrfp(soil, s, gp, lai, zr)*(soil.psi_s(s) - psi_l) + lai*self.gwf(psi_w)*(psi_w - psi_l))/ \
-		           (1. + (self.gsrfp(soil, s, gp, lai, zr)*(1. - self.F_CAP))/(lai*gp) + (self.gwf(psi_w)*(1. - self.F_CAP))/gp))
+    		return (phi*lai - self.shf(tl, ta, lai) -LAMBDA_W*RHO_W*self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)/1000000.,  \
+    			self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)\
+    			-(self.gsrfp(soil, s, gp, lai, zr)*(soil.psi_s(s) - psi_l) + lai*self.gwf(psi_w)*(psi_w - psi_l))/ \
+    			(1. + (self.gsrfp(soil, s, gp, lai, zr)*(1. - self.F_CAP))/(lai*gp) + (self.gwf(psi_w)*(1. - self.F_CAP))/gp))
 	    else:
-			return (phi - self.shf(tl, ta, lai) -LAMBDA_W*RHO_W*self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)/1000000., 
-		        self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)
-		           -(self.gsrfp(soil, s, gp, lai, zr)*(soil.psi_s(s) - psi_l) + lai*self.gwf(psi_w)*(psi_w - psi_l))/
-		           (1. + (self.gsrfp(soil, s, gp, lai, zr)*(1. - self.F_CAP))/(lai*gp) + (self.gwf(psi_w)*(1. - self.F_CAP))/gp))
+	    	return (phi - self.shf(tl, ta, lai) -LAMBDA_W*RHO_W*self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)/1000000., 
+			self.evf(photo, phi, ta, psi_l, qa, tl, c1, lai, ared)
+			-(self.gsrfp(soil, s, gp, lai, zr)*(soil.psi_s(s) - psi_l) + lai*self.gwf(psi_w)*(psi_w - psi_l))/
+			(1. + (self.gsrfp(soil, s, gp, lai, zr)*(1. - self.F_CAP))/(lai*gp) + (self.gwf(psi_w)*(1. - self.F_CAP))/gp))
 
 class Amari(object):
 	NAME = 'A. mari'
@@ -657,6 +921,25 @@ class Taest(object):
 	PSILA0 = -2.
 	PSILA1 = -0.7
 
+class Zmays(object):
+	NAME = 'Z. mays'
+	PTYPE = C4
+
+	ZR = 0.5 # most of these are old values for sorghum
+	LAI = 5.
+	GCUT = 0.1802
+	GA = 61.
+	RAIW = 5.6
+	GPMAX = 0.13
+
+	GWMAX = 0.
+	VWT = .000001
+	CAP = 0.15
+
+	VCMAX0 = 39.
+	JMAX0 = 180.
+	PSILA0 = -1.9
+	PSILA1 = -0.3
 
 class Sbico(object):
 	NAME = 'S. bico'
@@ -684,7 +967,7 @@ class Oficu(object):
 	PTYPE = CAM
 
 	ZR = 0.3
-	LAI = 4.4
+	LAI = 3.5
 	GCUT = 0.
 	GA = 324.
 	RAIW = 3.
@@ -694,8 +977,8 @@ class Oficu(object):
 	VWT = .0113
 	CAP = 0.83
 
-	VCMAX0 = 13.
-	JMAX0 = 26.
+	VCMAX0 = 20. # old value 13
+	JMAX0 = 40. # old value 26
 	PSILA0 = -3.
 	PSILA1 = -0.5
 
@@ -737,16 +1020,20 @@ class Clusia(object):
 	RAIW = 6.
 	GPMAX = 2.
 
-	GWMAX = 0.1
-	VWT = .00058
+	GWMAX = 0.01
+	VWT = .00058 # max. storage depth (m3/m2 leaf area)
 	CAP = 0.1
+
 
 	VCMAX0 = 3.15
 	JMAX0 = 6.3
 	MMAX = 92000000.
 	AMMAX = 1.1
-	PSILA0 = -3.
+	PSILA0 = -1.5
 	PSILA1 = -.5
+
+	VLT = .0011 # water storage depth in leaves (m3/m2 leaf area)
+	LCAP = 0.1 # hydraulic capacitance of leaf tissue (MPa)
 
 class Pmenz(object):
 	NAME = 'P. menz'
@@ -811,7 +1098,7 @@ class FacCAM(Photo):
 			self.A1 = 0.6*15.
 			self.mmax = self.MUPPER
 			if psi_l < -2.5:
-				self.mmax = MUPPER
+				self.mmax = self.MUPPER
 		else:
 			pass
 		self.ci = self.ciNew(self.cs, atm.ta, atm.qa)
