@@ -1,13 +1,6 @@
 timestepM = 30 # Model change in time at each step (min)
 timestepD = 30 # timestep of input data 
 dt = timestepM*60. # no. of seconds in timestep, used to advance differential equations
-
-#c
-# Rainfall parameters
-alpha = 1.5 # Average Precipitaion Amount (cm)
-lambda_r = .3 # Frequency of Rainfall events (1/d)
-#gamma = (n[sType]*zr*100.)/alpha; # Normalized Depth of Rainfall
-
 # General Constants
 LAMBDA_W = 2.5*10**6 # Latent heat of water vaporization (J/kg )
 LAMBDA_L = 550.*10**-9 # Wavelength of light (m)
