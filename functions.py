@@ -4,7 +4,7 @@ from dics import *
 
 def steps(duration, timeStep):
     """Change Duration of Simulation to to number of timesteps according to timestep value"""
-    return(duration*24*60)/timeStep
+    return (duration*24*60)//timeStep
 
 def VPD(ta, qa):
     """Vapor pressure deficit (Pa)"""
