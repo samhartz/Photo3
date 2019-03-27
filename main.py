@@ -8,21 +8,14 @@ from dics import *
 from functions import *
 from defs import *
 import importlib as importlib
-import gui
-importlib.reload(gui)
-import gui as gui
 
-#duration = 1
-#weatherFile = "sample_data\ConsoliInterp.xlsx"
-# resultsFile = 'sample_output/testgui' # default value for the location where results are saved
+duration = 10
+weatherFile = "sample_data\TempleApril2015Interp30.xlsx"
+resultsFile = 'sample_output/test' # default value for the location where results are saved
 
 timestepM = 30 # Model change in time at each step (min)
 timestepD = 30 # timestep of input data 
 dt = timestepM*60. # no. of seconds in timestep, used to advance differential equations
-
-duration = gui.duration
-weatherFile = gui.weatherLoc
-resultsFile = gui.resultsLoc
 
 df = pd.read_excel(weatherFile)
 tempC = df['Temperature']
@@ -34,24 +27,14 @@ qaInp = list(qaInp.values)
 taInp = list(taInp.values)
 phiInp = list(df['GHI'].values)  # extracts global solar radiation column from Excel Worksheet in W/m^2
 
-#need to implement different soil behaviors in GUI
-
-#use with GUI
-sinit = gui.s0
-vwi  = 0.9 # initial water content, as a %
-species = gui.species()
+# enter values manually
+sinit = 0.5
+vwi = 0.9
+species = Oficu()
 atmosphere = Atmosphere(phiInp[0], taInp[0], qaInp[0])
-#soil = Soil(gui.sType(), DrydownSoil(), species.ZR, sinit)
-soil = Soil(gui.sType(), gui.soilDynamics, species.ZR, sinit)
-photo = species.PTYPE(species, atmosphere)
-hydro = gui.hydrology(species, atmosphere, soil, photo, vwi)
-
-#enter values manually
-#sinit = 0.5
-#species = Clusia()
-#soil = Soil(Loam(), species.ZR, sinit)
-#photo = CAM(species, atmosphere)
-#hydro = HydroCap(species, atmosphere, soil, photo, vwi)
+soil = Soil(Loam(), DrydownSoil(), species.ZR, sinit)
+photo = CAM(species, atmosphere)
+hydro = HydroCap(species, atmosphere, soil, photo, vwi)
 
 plant = Simulation(species, atmosphere, soil, photo, hydro)
 
