@@ -20,7 +20,7 @@ soilVariable = tk.StringVar(value="Sandy loam") # default value
 capVariable = tk.StringVar(value = "Yes")
 spVariable = tk.StringVar(value = "Opuntia ficus-indica") # default value
 rainVariable = tk.StringVar(value = "Drydown") # options: "Drydown", "Constant", "Input rainfall", "Stochastic", "Input VWC"
-weatherFile = tk.StringVar(value="sample_data\RoccaInterp30.xlsx") # default value for the location of the weather data
+weatherFile = tk.StringVar(value="sample_data\TempleApril2015Interp30.xlsx") # default value for the location of the weather data
 repeatWeather = 1 # option to repeat the data in weatherFile x number of times...default value is 1 for no repeat
 resultsFile = tk.StringVar(value = 'sample_output\guitest') # default value for the location where results are saved
 
