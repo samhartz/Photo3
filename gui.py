@@ -7,7 +7,7 @@ try:
     import tkFileDialog as filedialog
 except ImportError:
     import tkinter.filedialog as filedialog
-from defs_Feb15 import *
+from defs import *
 
 root = tk.Tk()  # This creates a window, but it won't show up
 
