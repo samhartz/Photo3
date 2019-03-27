@@ -1,11 +1,15 @@
 # Photo3
 The Photo3 model describes C3, C4, and CAM photosynthesis in a consistent manner using a model which is built on the Farquhar et al. model for carbon assimilation. The model incorporates soil and atmospheric conditions through a representation of the soil-plant-atmosphere continuum. Given soil moisture, air temperature, humidity and solar radiation, the model calculates net carbon assimilation and transpiration, among other variables of interest. Photo3 is currently parameterized for three representative species, one from each photosynthetic type: *Triticum aestivum* (C3), *Sorghum bicolor* (C4), and *Opuntia ficus-indica* (CAM).
 
+# Model Execution
+
+To run the model, simply download the essential files (main_gui.py, defs.py, functions.py, dics.py, gui.py) to the same folder and run the main file (main_gui.py). A graphical user interface (GUI) will display allowing the user to choose a plant species, soil type, soil moisture, duration of the simulation, and a data file containing weather inputs (solar radiation, temperature, and humidity). Results will be exported to the file location chosen in the user interface, and/or may be viewed directly from the command prompt or IDE. The sample_data folder contains sample weather inputs for a location in Temple, TX, and the sample_output folder contains results from a few simulations in this area. 
+
 # Model Structure
 
-To run the model, simply run the file main.py. A graphical user interface will display allowing the user to choose a plant species, soil type, soil moisture, duration of the simulation, and a data file containing weather inputs (solar radiation, temperature, and humidity). Results will be exported to the file location chosen in the user interface, and/or may be viewed directly from the command prompt or IDE. 
+The model is structured in an object-oriented fashion, using mixins to combine different photosynthetic, hydraulic, soil, and atmosphere sub-components. The main_gui.py script is the engine which runs the model, calling on the gui.py file to create a GUI which interprets the user's input to the model and creating a Simulation() object which is updated at each timestep according to the model inputs. The defs.py file contains the definitions of the classes and their functions, the dics.py file contains the model global variables, and the functions.py file contains the model global functions. Alternatively, the model can be executed by running the main.py script, which does not involve a GUI. The user may directly change the input variables within the file main.py.
 
-The sample_data folder contains sample weather inputs for a location in Temple, TX, and the sample_output folder contains results from a few simulations in this area. An academic article describing the model details is available in Ecological Modelling:
+An academic article describing the model details is available in Ecological Modelling:
 
   *Hartzell, S., Bartlett, M.S. and A. Porporato (2018) Unified representation of the C3, C4, and CAM photosynthetic pathways with the       Photo3 model. Ecological Modelling, doi: 10.1016/j.ecolmodel.2018.06.012.*
 
