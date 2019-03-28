@@ -14,7 +14,7 @@ An academic article describing the model details is available in Ecological Mode
   *Hartzell, S., Bartlett, M.S. and A. Porporato (2018) Unified representation of the C3, C4, and CAM photosynthetic pathways with the       Photo3 model. Ecological Modelling, doi: 10.1016/j.ecolmodel.2018.06.012.*
 
 # Model requirements
-Photo3 was developed in Python 3.6 with the following packages: SciPy, NumPy, Pandas, tkinter, Matplotlib. We suggest intalling a Python distribution such as [Anaconda][An] to meet these requirements. 
+Photo3 was developed in Python 3.6 with the following packages: SciPy, NumPy, Pandas, tkinter, SymPy, Matplotlib. We suggest intalling a Python distribution such as [Anaconda][An] to meet these requirements. 
 
 [An]: https://www.continuum.io/downloads
 
