@@ -461,8 +461,11 @@ class Hydro(object):
 		return self.RAIW*s**-self.A_ROOT
 	def evf(self, photo, phi, ta, psi_l, qa, tl, ci, lai, ared, **kwargs):
 	    """Transpiration, per unit ground area (um/sec)"""
-	    return max(lai*(1./(self.gsw(photo, phi, ta, psi_l, qa, tl, ci, ared, **kwargs)*R*ta/P_ATM*1000000.)+1./(self.GA*1000.))**(-1.)\
-	    *RHO_A/RHO_W*(self.qi(tl, psi_l)-qa), 0.)
+	    if self.gsw(photo, phi, ta, psi_l, qa, tl, ci, ared) < 0.00001:
+	    	return 0.
+	    else:
+	    	return max(lai*(1./(self.gsw(photo, phi, ta, psi_l, qa, tl, ci, ared, **kwargs)*R*ta/P_ATM*1000000.)+1./(self.GA*1000.))**(-1.)\
+	    	*RHO_A/RHO_W*(self.qi(tl, psi_l)-qa), 0.)
 	def qi(self, tl, psi_l):
 	    """Specific humidity internal to leaf (kg/kg)"""
 	    try: 
@@ -694,8 +697,11 @@ class HydroLeafCap(Hydro):
 
 	def evf(self, photo, phi, ta, psi_l, qa, tl, ci, lai, ared, psi_2):
 	    """Transpiration, per unit ground area (um/sec)"""
-	    return max(lai*(1./(self.gsw(photo, phi, ta, psi_l, qa, tl, ci, ared)*R*ta/P_ATM*1000000.)+1./(self.GA*1000.))**(-1.)\
-	    *RHO_A/RHO_W*(self.qi(tl, psi_2)-qa), 0.)
+	    if self.gsw(photo, phi, ta, psi_l, qa, tl, ci, ared) < 0.00001:
+	    	return 0.
+	    else:
+	    	return max(lai*(1./(self.gsw(photo, phi, ta, psi_l, qa, tl, ci, ared)*R*ta/P_ATM*1000000.)+1./(self.GA*1000.))**(-1.)\
+	    	*RHO_A/RHO_W*(self.qi(tl, psi_2)-qa), 0.)
 
 class HydroLeafCapOld(Hydro):
 	F_CAP = 0.5
