@@ -461,7 +461,7 @@ class Hydro(object):
 		return self.RAIW*s**-self.A_ROOT
 	def evf(self, photo, phi, ta, psi_l, qa, tl, ci, lai, ared, **kwargs):
 	    """Transpiration, per unit ground area (um/sec)"""
-	    if self.gsw(photo, phi, ta, psi_l, qa, tl, ci, ared) < 0.00001:
+	    if self.gsw(photo, phi, ta, psi_l, qa, tl, ci, ared, **kwargs) < 0.00001:
 	    	return 0.
 	    else:
 	    	return max(lai*(1./(self.gsw(photo, phi, ta, psi_l, qa, tl, ci, ared, **kwargs)*R*ta/P_ATM*1000000.)+1./(self.GA*1000.))**(-1.)\
