@@ -344,8 +344,8 @@ class CAM(Photo):
 	GMGSRATIO = 1.
 	TR = 90.; # Relaxation time for circadian oscillator (min)
 	C0 = 3000. # parameter for decarboxylation of malic acid (umol/mol)
-	ALPHA_1 = 1/100.
-	ALPHA_2 = 1/7. 
+	ALPHA_1 = 1/100. # Circadian oscillator constant
+	ALPHA_2 = 1/7. # Circadian oscillator constant
 	K = .003 
 	TOPT = 288.65 # (K)
 	VCM = 0.0027 # Value controlling relative storage of malate (m)
@@ -442,7 +442,8 @@ class CAM(Photo):
 
 
 class Hydro(object):
-	A_ROOT = 8.
+	"""General plant hydraulics"""
+	A_ROOT = 8. # Parameter for root response to soil moisture
 	def __init__(self, species):
 		self.GPMAX = species.GPMAX
 		self.GA = species.GA
@@ -493,6 +494,7 @@ class Hydro(object):
 	    return photo.gsc(phi, ta, psi_l, qa, tl, ci, ared)*1.6 + (self.GCUT*P_ATM/(1000.*R*ta))
 
 class HydroNC(Hydro):
+	"""Plant hydraulics without plant water storage"""
 	def __init__(self, species, atm, soil, photo, vwi):
 		Hydro.__init__(self, species)
 		self.psi_l, self.tl = fsolve(self.fBal, (-1., 290.), args= (soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr))
@@ -527,6 +529,7 @@ class HydroNC(Hydro):
 
 
 class HydroCap(Hydro):
+	"""Plant hydraulics with plant water storage"""
 	F_CAP = 0.5
 	def __init__(self, species, atm, soil, photo, vwi):
 		Hydro.__init__(self, species)
@@ -592,6 +595,7 @@ class HydroCap(Hydro):
 				(1. + (self.gsrfp(soil, s, gp, lai, zr)*(1. - self.F_CAP))/(lai*gp) + (self.gwf(psi_w)*(1. - self.F_CAP))/gp))
 
 class HydroLeafCap(Hydro):
+	"""Plant hydraulics with stem and leaf water storage"""
 	F_CAP = 0.5
 	def __init__(self, species, atm, soil, photo, vwi, vli, lcap, vlt, gleaf):
 		Hydro.__init__(self, species)
@@ -905,6 +909,7 @@ class Amari(object):
 	PSILA1 = -0.05
 
 class Taest(object):
+	"""Triticum aestivum (winter wheat)"""
 	NAME = 'T. aest'
 	PTYPE = C3
 
@@ -928,6 +933,7 @@ class Taest(object):
 	PSILA1 = -0.7
 
 class Zmays(object):
+	"""Zea mays (maize)"""
 	NAME = 'Z. mays'
 	PTYPE = C4
 
@@ -948,6 +954,7 @@ class Zmays(object):
 	PSILA1 = -0.3
 
 class Sbico(object):
+	"""Sorghum bicolor (sorghum)"""
 	NAME = 'S. bico'
 	PTYPE = C4
 
@@ -969,6 +976,7 @@ class Sbico(object):
 
 
 class Oficu(object):
+	"""Opuntia ficus-indica (prickly pear/cactus pear)"""
 	NAME = 'O. ficu'
 	PTYPE = CAM
 
@@ -992,6 +1000,7 @@ class Oficu(object):
 	AMMAX = 13.5  # rate of malic acid storage flux (umol/(m^2 s)
 
 class Atequ(object):
+	"""Agave tequilana"""
 	NAME = 'A. tequ'
 	PTYPE = CAM
 
@@ -1015,6 +1024,7 @@ class Atequ(object):
 	capOn = True
 
 class Clusia(object):
+	"""Clusia (general, CAM)"""
 	NAME = 'Clusia'
 	PTYPE = CAM
 
@@ -1042,6 +1052,7 @@ class Clusia(object):
 	LCAP = 0.1 # hydraulic capacitance of leaf tissue (MPa)
 
 class Pmenz(object):
+	"""Pseudotsuga menziesii (Douglas fir)"""
 	NAME = 'P. menz'
 	PTYPE = C3
 
@@ -1062,6 +1073,7 @@ class Pmenz(object):
 	capOn = True
 
 class FacCAM(Photo):
+	"""Facultative CAM (switches from C3 to CAM when psi_l < -1)"""
 	# A1 = 0.6*15.
 	GAMMA_0 = 34.6
 	RC = 0.5
