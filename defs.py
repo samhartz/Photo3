@@ -287,6 +287,7 @@ class C3(Photo):
 	def update(self, atm, psi_l, tl, dt):
 		self.ci = self.ciNew(self.cs, atm.ta, atm.qa)
 		self.cm = self.cmNew(self.cs, atm.ta, atm.qa)
+		self.cx = self.cm
 		self.a = self.an(atm.phi, psi_l, tl, self.cm, self.ared)
 		self.a_a.append(self.a)
 	def output(self):
