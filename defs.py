@@ -339,7 +339,7 @@ class C4(Photo):
 		return (self.v_p(psi_l, cm) - an)/self.GBS + cm
 
 class CAM(Photo):
-	A1 = 0.6*15.
+	A1 = 0.8*15.
 	GAMMA_0 = 34.6
 	RC = 0.5
 	GMGSRATIO = 1.
