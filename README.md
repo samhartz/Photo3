@@ -23,5 +23,21 @@ Half hourly data for solar radiation, temperature, and specific humidity is need
 
 The final weather data file supplied to the model should have the headings: Temperature, Relative Humidity, GHI, and should match the model timestep of 30 minutes (see example files in the sample_data folder).
 
+# Publications
+
+Miller, G., Hartzell, S., and A. Porporato. Ecohydrology of epiphytes: modeling water balance, CAM photosynthesis, and their climate impacts. In press, Ecohydrology.
+
+Hartzell, S., Bartlett, M.S., Inglese, P., Consoli, S., Yin, J. and A. Porporato (2020) Modeling nonlinear dynamics of CAM productivity and water use for global predictions. Plant, Cell and Environment, 44(1) [10.1111/pce.13918].
+
+Hartzell, S., Bartlett, M.S. and A. Porporato (2018) Unified representation of the C3, C4, and CAM photosynthetic pathways with the Photo3 model. Ecological Modelling, 384 [10.1016/j.ecolmodel.2018.06.012].
+
+# License
+
+Copyright (C) 2021, Samantha Hartzell  
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
 
 
