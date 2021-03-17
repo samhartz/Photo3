@@ -13,11 +13,6 @@ An academic article describing the model details is available in Ecological Mode
 
   *Hartzell, S., Bartlett, M.S. and A. Porporato (2018) Unified representation of the C3, C4, and CAM photosynthetic pathways with the       Photo3 model. Ecological Modelling, doi: 10.1016/j.ecolmodel.2018.06.012.*
 
-# Model requirements
-Photo3 was developed in Python 3.6 with the following packages: SciPy, NumPy, Pandas, tkinter, SymPy, Matplotlib. We suggest intalling a Python distribution such as [Anaconda][An] to meet these requirements. 
-
-[An]: https://www.continuum.io/downloads
-
 # Instructions for formatting weather data for the model input
 Half hourly data for solar radiation, temperature, and specific humidity is needed to run the Photo3 model. Hourly data may be obtained from a variety of sources and then interpolated to the model timestep of 30 minutes using the script cleanData.py, which will produce a new excel file which can be read into the model. In order to use cleanData.py, the data must first be formatted with the following columns: Year, Month, Day, Hour, Minute, GHI, Temperature, Relative Humidity. Data cannot contain gaps larger than 23 hours.
 
@@ -30,6 +25,11 @@ Miller, G., Hartzell, S., and A. Porporato. Ecohydrology of epiphytes: modeling 
 Hartzell, S., Bartlett, M.S., Inglese, P., Consoli, S., Yin, J. and A. Porporato (2020) Modeling nonlinear dynamics of CAM productivity and water use for global predictions. Plant, Cell and Environment, 44(1) [10.1111/pce.13918].
 
 Hartzell, S., Bartlett, M.S. and A. Porporato (2018) Unified representation of the C3, C4, and CAM photosynthetic pathways with the Photo3 model. Ecological Modelling, 384 [10.1016/j.ecolmodel.2018.06.012].
+
+# Model requirements
+Photo3 was developed in Python 3.6 with the following packages: SciPy, NumPy, Pandas, tkinter, SymPy, Matplotlib. We suggest intalling a Python distribution such as [Anaconda][An] to meet these requirements. 
+
+[An]: https://www.continuum.io/downloads
 
 # License
 
