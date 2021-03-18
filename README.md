@@ -31,6 +31,9 @@ Photo3 was developed in Python 3.6 with the following packages: SciPy, NumPy, Pa
 
 [An]: https://www.continuum.io/downloads
 
+# Authorship
+The Photo3 model was created by Samantha Hartzell, Mark Bartlett, and Amilcare Porporato in the Princeton University Department of Civil and Environmental Engineering and the Princeton Environmental Institute.
+
 # License
 
 Copyright (C) 2021, Samantha Hartzell  
