@@ -13,7 +13,12 @@ def VPD(ta, qa):
 def esat(ta):
     """Saturated vapor pressure (Pa)"""
     return A_SAT*exp((B_SAT*(ta - 273.))/(C_SAT + ta - 273.))
+
 def qaRh(rh, ta):
     """Specific humidity (kg/kg), input of rh in %, ta in K"""
     return 0.622*rh/100.*esat(ta)/P_ATM # needs to be in kg/kg
+
+def psi_i(tl, qi):
+    """Calculate the water potential (MPa) as a function of specific huimidity and ta"""
+    return log(qi*P_ATM/(.622*esat(tl)))*R*tl/(1000000*VW)
 
