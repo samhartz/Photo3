@@ -6,6 +6,10 @@ from math import exp, pi, sqrt, log
 import matplotlib.pyplot as plt
 from dics import *
 from functions import *
+from soil import *
+from photosynthesis import *
+from hydraulics import *
+from species_traits import *
 from defs import *
 import importlib as importlib
 
