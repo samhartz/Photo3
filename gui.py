@@ -1,3 +1,11 @@
+from dics import *
+from functions import *
+from soil import *
+from photosynthesis import *
+from hydraulics import *
+from species_traits import *
+from defs import *
+
 try:
     import tkinter as tk
 except ImportError:
@@ -25,7 +33,7 @@ repeatWeather = 1 # option to repeat the data in weatherFile x number of times..
 resultsFile = tk.StringVar(value = 'sample_output\guitest') # default value for the location where results are saved
 
 capOptions = {"No": HydroNC, "Yes": HydroCap}
-speciesOptions = {"Triticum aestivum": Taest, "Sorghum bicolor": Sbico, "Opuntia ficus-indica": Oficu, "Agave tequilana": Atequ}
+speciesOptions = {"Triticum aestivum": Taest, "Sorghum bicolor": Sbico, "Opuntia ficus-indica": Oficu}
 soilOptions = {"Sand": Sand, "Sandy loam": SandyLoam, "Loamy sand": LoamySand, "Loam": Loam, "Clay": Clay}
 rainOptions = {"Drydown": DrydownSoil(), "Constant": ConstantSoil(), "Stochastic rainfall": StochasticSoil(1.5, .3)}
 
