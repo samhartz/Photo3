@@ -76,16 +76,16 @@ class HydroNC(Hydro):
 	def __init__(self, species, atm, soil, photo, vwi):
 		Hydro.__init__(self, species)
 		self.psi_l, self.tl = fsolve(self.fBal, (-1., 290.), args= (soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr))
-		if self.qi(self.tl, self.psi_l) < atm.qa:
-			self.psi_l = psi_i(atm.ta, atm.qa)
-			self.tl = fsolve(self.fBal_psil_known, (290.), args= (self.psi_l, soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr))
+# 		if self.qi(self.tl, self.psi_l) < atm.qa:
+# 			self.psi_l = psi_i(atm.ta, atm.qa)
+# 			self.tl = fsolve(self.fBal_psil_known, (290.), args= (self.psi_l, soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr))
 		self.gp = self.gpf(self.psi_l)
 		self.ev = self.evf(photo, atm.phi, atm.ta, self.psi_l, atm.qa, self.tl, photo.cx, self.lai, photo.ared)
 	def update(self, atm, soil, photo, dt):
 		self.psi_l, self.tl = fsolve(self.fBal, (-1., 290.), args= (soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr))
-		if self.qi(self.tl, self.psi_l) < atm.qa:
-			self.psi_l = psi_i(atm.ta, atm.qa)
-			self.tl = fsolve(self.fBal_psil_known, (290.), args= (self.psi_l, soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr))
+# 		if self.qi(self.tl, self.psi_l) < atm.qa:
+# 			self.psi_l = psi_i(atm.ta, atm.qa)
+# 			self.tl = fsolve(self.fBal_psil_known, (290.), args= (self.psi_l, soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr))
 		self.gp = self.gpf(self.psi_l)
 		self.ev = self.evf(photo, atm.phi, atm.ta, self.psi_l, atm.qa, self.tl, photo.cx, self.lai, photo.ared)
 		self.qs = self.ev
@@ -158,18 +158,18 @@ class HydroCap(Hydro):
 		self.CAP = species.CAP
 		self.vw = vwi*self.VWT
 		self.psi_l, self.tl = fsolve(self.fBal, (-1., 290.), args= (soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr, self.vw))
-		if self.qi(self.tl, self.psi_l) < atm.qa:
-			self.psi_l = psi_i(atm.ta, atm.qa)
-			self.tl = fsolve(self.fBal_psil_known, (290.), args= (self.psi_l, soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr, self.vw))
+# 		if self.qi(self.tl, self.psi_l) < atm.qa:
+# 			self.psi_l = psi_i(atm.ta, atm.qa)
+# 			self.tl = fsolve(self.fBal_psil_known, (290.), args= (self.psi_l, soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr, self.vw))
 		self.gp = self.gpf(self.psi_l)
 		self.ev = self.evf(photo, atm.phi, atm.ta, self.psi_l, atm.qa, self.tl, photo.cx, self.lai, photo.ared)
 		self.vw_a = []
 
 	def update(self, atm, soil, photo, dt):
 		self.psi_l, self.tl = fsolve(self.fBal, (-1., 290.), args= (soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr, self.vw))
-		if self.qi(self.tl, self.psi_l) < atm.qa:
-			self.psi_l = psi_i(atm.ta, atm.qa)
-			self.tl = fsolve(self.fBal_psil_known, (290.), args= (self.psi_l, soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr, self.vw))
+# 		if self.qi(self.tl, self.psi_l) < atm.qa:
+# 			self.psi_l = psi_i(atm.ta, atm.qa)
+# 			self.tl = fsolve(self.fBal_psil_known, (290.), args= (self.psi_l, soil, photo, atm.phi, atm.ta, atm.qa, photo.cx, soil.s, self.lai, self.gp, photo.ared, self.zr, self.vw))
 		self.gp = self.gpf(self.psi_l)
 		self.vw = self.vwf(self.vw, self.ev, self.gp, self.psi_l, self.lai, dt)
 		self.ev = self.evf(photo, atm.phi, atm.ta, self.psi_l, atm.qa, self.tl, photo.cx, self.lai, photo.ared)
