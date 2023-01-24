@@ -11,25 +11,28 @@ class Oficu(object):
 	NAME = 'O. ficu'
 	PTYPE = CAM
 
-	ZR = 0.3
-	LAI = 3.5
-	GCUT = 0.
+	ZR = 0.3 # rooting depth (m)
+	LAI = 3.5 # leaf area index (-)
+	GCUT = 0. # cuticular conductance
 	#GA = 324.
-	GA = 30.
-	RAIW = 3.
-	GPMAX = .4
+	GA = 30. # atmospheric conductance
+	RAIW = 3. # well-watered root area index (-)
+	GPMAX = .4 # maximum plant hydraulic conductance
 
-	GWMAX = .02
-	VWT = .0113
-	CAP = 0.83
+	# plant water storage parameters
+	GWMAX = .02 # max. conductance between water storage tissue and plant xylem
+	VWT = .0113 # maximum water storage depth
+	CAP = 0.83 # hydraulic capacitance
 
-	VCMAX0 = 18. #20. # old value 13
-	JMAX0 = 36. #40. # old value 26
-	PSILA0 = -3.
-	PSILA1 = -0.5
-
-	MMAX = 230000000. # 190000000. # max concentration of malic acid (umol/m^3) 230
-	AMMAX = 14. # 13.5  # rate of malic acid storage flux (umol/(m^2 s) 14
+	# photosynthetic parameters
+	VCMAX0 = 18. # maximum carboxylation capacity
+	JMAX0 = 36. # maximum electron transport capacity
+	PSILA0 = -3. # leaf water potential at point of full stomatal closure (MPa)
+	PSILA1 = -0.5 # leaf water potential at onset of stomatal closure (MPa)
+	
+	#CAM-specific parameters
+	MMAX = 230000000.  # max concentration of malic acid (umol/m^3) 
+	AMMAX = 14. # rate of malic acid storage flux (umol/(m^2 s) 
 
 class Pmenz(object):
 	"""Pseudotsuga menziesii (Douglas fir)"""
