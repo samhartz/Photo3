@@ -3,7 +3,7 @@ The Photo3 model describes C3, C4, and CAM photosynthesis in a consistent manner
 
 # Model Execution
 
-To run the model, simply download the essential files (main_gui.py, defs.py, functions.py, dics.py, gui.py) to the same folder and run the main file (main_gui.py). A graphical user interface (GUI) will display allowing the user to choose a plant species, soil type, soil moisture, duration of the simulation, and a data file containing weather inputs (solar radiation, temperature, and humidity). Results will be exported to the file location chosen in the user interface, and/or may be viewed directly from the command prompt or IDE. The sample_data folder contains some sample weather inputs, and the sample_output folder contains results from a few example simulations. 
+To run the model, simply download the included files to the same folder and run the main file (main_gui.py). A graphical user interface (GUI) will display allowing the user to choose a plant species, soil type, soil moisture, duration of the simulation, and a data file containing weather inputs (solar radiation, temperature, and humidity). Results will be exported to the file location chosen in the user interface, and/or may be viewed directly from the command prompt or IDE. The sample_data folder contains some sample weather inputs, and the sample_output folder contains results from a few example simulations. For more control over model set-up, the user can utilize the main.py file, which does not involve a graphical user interface.
 
 # Model Structure
 
