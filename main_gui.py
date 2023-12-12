@@ -13,8 +13,6 @@ from species_traits import *
 from defs import *
 import importlib as importlib
 import gui
-importlib.reload(gui)
-import gui as gui
 
 timestepM = 30 # Model change in time at each step (min)
 timestepD = 30 # timestep of input data 
