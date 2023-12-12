@@ -3,13 +3,13 @@ The Photo3 model describes C3, C4, and CAM photosynthesis in a consistent manner
 
 # Model Execution
 
-To run the model, simply download the essential files (main_gui.py, defs.py, functions.py, dics.py, gui.py) to the same folder and run the main file (main_gui.py). A graphical user interface (GUI) will display allowing the user to choose a plant species, soil type, soil moisture, duration of the simulation, and a data file containing weather inputs (solar radiation, temperature, and humidity). Results will be exported to the file location chosen in the user interface, and/or may be viewed directly from the command prompt or IDE. The sample_data folder contains sample weather inputs for a location in Temple, TX, and the sample_output folder contains results from a few simulations in this area. 
+To run the model, simply download the essential files (main_gui.py, defs.py, functions.py, dics.py, gui.py) to the same folder and run the main file (main_gui.py). A graphical user interface (GUI) will display allowing the user to choose a plant species, soil type, soil moisture, duration of the simulation, and a data file containing weather inputs (solar radiation, temperature, and humidity). Results will be exported to the file location chosen in the user interface, and/or may be viewed directly from the command prompt or IDE. The sample_data folder contains some sample weather inputs, and the sample_output folder contains results from a few example simulations. 
 
 # Model Structure
 
 The model is structured in an object-oriented fashion, using mixins to combine photosynthetic, hydraulic, soil, and atmosphere sub-components. The main_gui.py script is the engine which runs the model, calling on the gui.py file to create a GUI which interprets the user's input to the model and creating a Simulation() object which is updated at each timestep according to the model inputs. The defs.py file contains the definitions of the classes and their functions, the dics.py file contains the model global variables, and the functions.py file contains the model global functions. Alternatively, the model can be executed by running the main.py script, which does not involve a GUI. The user may directly change the input variables within the file main.py.
 
-To run the model, simply run the file main.py. A graphical user interface will display allowing the user to choose a plant species, soil type, soil moisture, duration of the simulation, and a data file containing weather inputs (solar radiation, temperature, and humidity). The results are then generated and exported to the selected folder as a pandas dataframe. The sample_data folder contains sample weather inputs for a location in Temple, TX, and the sample_output folder contains results generated using the sample data.
+To run the model, simply run the file main_gui.py. A graphical user interface will display allowing the user to choose a plant species, soil type, soil moisture, duration of the simulation, and a data file containing weather inputs (solar radiation, temperature, and humidity). The results are then generated and exported to the selected folder as a pandas dataframe. The sample_data folder contains sample weather inputs for a location in Temple, TX, and the sample_output folder contains results generated using the sample data.
 
 An academic article describing the model details is available in Ecological Modelling:
 
@@ -22,9 +22,11 @@ The final weather data file supplied to the model should have the headings: Temp
 
 # Publications
 
-Miller, G., Hartzell, S., and A. Porporato. Ecohydrology of epiphytes: modeling water balance, CAM photosynthesis, and their climate impacts. In press, Ecohydrology.
+Leverett, A., Hartzell, S., Winter, K., Garcia, M., Aranda, J., Virgo, A., Smith, A., Focht, P., Rasmussen-Arda, A., Willats, W. G. T., Cowan-Turner, D., & Borland, A. M. (2023). Dissecting succulence: Crassulacean acid metabolism and hydraulic capacitance are independent adaptations in Clusia leaves. Plant, Cell and Environment [10.1111/pce.14539].
 
-Hartzell, S., Bartlett, M.S., Inglese, P., Consoli, S., Yin, J. and A. Porporato (2020) Modeling nonlinear dynamics of CAM productivity and water use for global predictions. Plant, Cell and Environment, 44(1) [10.1111/pce.13918].
+Miller, G., Hartzell, S., and A. Porporato. Ecohydrology of epiphytes: modeling water balance, CAM photosynthesis, and their climate impacts. Ecohydrology, 14(3) [10.1002/eco.2275].
+
+Hartzell, S., Bartlett, M.S., Inglese, P., Consoli, S., Yin, J. and A. Porporato (2021) Modeling nonlinear dynamics of CAM productivity and water use for global predictions. Plant, Cell and Environment, 44(1) [10.1111/pce.13918].
 
 Hartzell, S., Bartlett, M.S. and A. Porporato (2018) Unified representation of the C3, C4, and CAM photosynthetic pathways with the Photo3 model. Ecological Modelling, 384 [10.1016/j.ecolmodel.2018.06.012].
 
