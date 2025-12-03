@@ -13,8 +13,8 @@ from species_traits import *
 from defs import *
 import importlib as importlib
 
-duration = 10
-weatherFile = "sample_data\TempleApril2015Interp30.xlsx"
+duration = 10 # simulation duration in days
+weatherFile = "sample_data\TempleApril2015Interp30.xlsx" # location of weather data with air temperature, air relative humidity, and solar radiation
 resultsFile = 'sample_output/test' # default value for the location where results are saved
 
 timestepM = 30 # Model change in time at each step (min)
@@ -22,23 +22,23 @@ timestepD = 30 # timestep of input data
 dt = timestepM*60. # no. of seconds in timestep, used to advance differential equations
 
 df = pd.read_excel(weatherFile)
-tempC = df['Temperature']
-taInp = tempC + 273. # convert to K
+tempC = df['Temperature'] # extracts temperature column (C)
+taInp = tempC + 273. # convert temperature from C to K
 rh = df['Relative Humidity'] # extracts rh column (%)
 psat = A_SAT*np.exp((B_SAT*(tempC))/(C_SAT + tempC)) # saturated vapor pressure in Pa
-qaInp = 0.622*rh/100.*psat/P_ATM # needs to be in kg/kg
+qaInp = 0.622*rh/100.*psat/P_ATM # calculate specific humidity in kg/kg
 qaInp = list(qaInp.values)
 taInp = list(taInp.values)
 phiInp = list(df['GHI'].values)  # extracts global solar radiation column from Excel Worksheet in W/m^2
 
 # enter values manually
-sinit = 0.5
-vwi = 0.9
-species = Oficu()
-atmosphere = Atmosphere(phiInp[0], taInp[0], qaInp[0])
-soil = Soil(Loam(), DrydownSoil(), species.ZR, sinit)
-photo = CAM(species, atmosphere)
-hydro = HydroCap(species, atmosphere, soil, photo, vwi)
+sinit = 0.5 # initial volumetric soil moisture content (unitless)
+vwi = 0.9 # initial plant volumetric water storage fraction (unitless)
+species = Oficu() # plant species (see species_traits.py for species options)
+atmosphere = Atmosphere(phiInp[0], taInp[0], qaInp[0]) # atmospheric conditions (solar radiation, temperature, and specific humidity)
+soil = Soil(Loam(), DrydownSoil(), species.ZR, sinit) # soil type and moisture content (see soil.py for options)
+photo = CAM(species, atmosphere) # plant photosynthesis (see photosynthesis.py for photosynthesis options)
+hydro = HydroCap(species, atmosphere, soil, photo, vwi) # plant hydraulics (see hydraulics.py for hydraulics options)
 
 plant = Simulation(species, atmosphere, soil, photo, hydro)
 
@@ -53,17 +53,16 @@ results = plant.output()
 
 
 data = pd.DataFrame.from_dict(results)
-data.to_pickle(resultsFile)
-# Save data as csv file
-data.to_csv(resultsFile)
+data.to_pickle(resultsFile) # Save data as pandas dataframe
+data.to_csv(resultsFile) # Save data as csv file
 
 #Plot results
-startDay = 2
-endDay = duration
-dispDuration = endDay-startDay
-daySteps = 60//timestepM*24
-timevec = np.linspace(0,duration,duration*daySteps)
-timevecHr = np.linspace(0,duration*24,duration*daySteps)
+startDay = 2 # Start time of graph (days)
+endDay = duration # End time of graph (days)
+dispDuration = endDay-startDay # Duration of graph (days)
+daySteps = 60//timestepM*24 # Model timesteps in one day (-)
+timevec = np.linspace(0,duration,duration*daySteps) # Time vector for graph (days)
+timevecHr = np.linspace(0,duration*24,duration*daySteps) # Time vector for graph (hours)
 
 anp = plt.figure()
 plt.title("Soil moisture")
@@ -102,3 +101,4 @@ plt.xlim(0, dispDuration)
 #plt.xticks([0.,6.,12.,18.,24.])
 #plt.legend()
 anp.show()
+
