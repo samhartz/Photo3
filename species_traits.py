@@ -104,10 +104,10 @@ class Taest(object):
 	CAP = 0.15 # hydraulic capacitance (MPa-1)
 
 	# Photosynthetic parameters
-	RD0 = 4.93
-	HAV = 62000.
-	HDV = 202900.
-	VCMAX0 = 83.
-	JMAX0 = 132.
-	PSILA0 = -2.
-	PSILA1 = -0.7
+	RD0 = 4.93 # standard dark respiration at 25 C (umol/m2/sec)
+	HAV = 62000. # activation energy for Vcmax (J/mol)
+	HDV = 202900. # deactivation energy for Vcmax (J/mol)
+	VCMAX0 = 83. # maximum carboxylation capacity (umol/m2/sec)
+	JMAX0 = 132. # maximum electron transport capacity (umol/m2/sec)
+	PSILA0 = -2. # leaf water potential at point of full stomatal closure (MPa)
+	PSILA1 = -0.7 # leaf water potential at onset of stomatal closure (MPa)
