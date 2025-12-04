@@ -63,8 +63,8 @@ class Pmenz(object):
 	
 class Sbico(object):
 	"""Sorghum bicolor"""
-	NAME = 'S. bico'
-	PTYPE = C4
+	NAME = 'S. bico' # species abbreviation (first letter genus, first four letters species)
+	PTYPE = C4 # photosynthetic pathway (C3, C4, or CAM)
 
 	# Plant hydraulic paramters
 	ZR = 0.5 # rooting depth (m)
@@ -87,20 +87,23 @@ class Sbico(object):
 
 class Taest(object):
 	"""Triticum aestivum (winter wheat)"""
-	NAME = 'T. aest'
-	PTYPE = C3
+	NAME = 'T. aest' # species abbreviation (first letter genus, first four letters species)
+	PTYPE = C3 # photosynthetic pathway (C3, C4, or CAM)
 
-	ZR = 0.75
-	LAI = 5.
-	GCUT = 0.3
-	GA = 61.
-	RAIW = 5.6
-	GPMAX = 11.7
+	# Plant hydraulic paramters
+	ZR = 0.75 # rooting depth (m)
+	LAI = 5. # leaf area index (-)
+	GCUT = 0.3 # cuticular conductance to water vapor (mm/s)
+	GA = 61. # atmospheric conductance per unit ground area (mm/s)
+	RAIW = 5.6 # well-watered root area index (-)
+	GPMAX = 11.7  # maximum plant stem hydraulic conductance (um/MPa/s)
 
-	GWMAX = 0.
-	VWT = .000001
-	CAP = 0.15
+	# Plant water storage parameters (only needed for plant hydraulics with capacitance option)
+	GWMAX = 0. # max. conductance between water storage tissue and plant xylem (um/MPa/s)
+	VWT = .000001 # maximum water storage depth (m)
+	CAP = 0.15 # hydraulic capacitance (MPa-1)
 
+	# Photosynthetic parameters
 	RD0 = 4.93
 	HAV = 62000.
 	HDV = 202900.
