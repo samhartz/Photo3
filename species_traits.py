@@ -8,73 +8,82 @@ from photosynthesis import *
 
 class Oficu(object):
 	"""Opuntia ficus-indica (prickly pear)"""
-	NAME = 'O. ficu'
-	PTYPE = CAM
+	NAME = 'O. ficu' # species abbreviation (first letter genus, first four letters species)
+	PTYPE = CAM # photosynthetic pathway (C3, C4, or CAM)
 
+	# Plant hydraulic paramters
 	ZR = 0.3 # rooting depth (m)
 	LAI = 3.5 # leaf area index (-)
-	GCUT = 0. # cuticular conductance
+	GCUT = 0. # cuticular conductance to water vapor (mm/s)
 	#GA = 324.
-	GA = 30. # atmospheric conductance
+	GA = 30. # atmospheric conductance per unit ground area (mm/s)
 	RAIW = 3. # well-watered root area index (-)
-	GPMAX = .4 # maximum plant hydraulic conductance
+	GPMAX = .4 # maximum plant stem hydraulic conductance (um/MPa/s)
 
-	# plant water storage parameters
-	GWMAX = .02 # max. conductance between water storage tissue and plant xylem
-	VWT = .0113 # maximum water storage depth
-	CAP = 0.83 # hydraulic capacitance
+	# Plant water storage parameters (only needed for plant hydraulics with capacitance option)
+	GWMAX = .02 # max. conductance between water storage tissue and plant xylem (um/MPa/s)
+	VWT = .0113 # maximum water storage depth (m)
+	CAP = 0.83 # hydraulic capacitance (MPa-1)
 
-	# photosynthetic parameters
-	VCMAX0 = 18. # maximum carboxylation capacity
-	JMAX0 = 36. # maximum electron transport capacity
+	# Photosynthetic parameters
+	VCMAX0 = 18. # maximum carboxylation capacity (umol/m2/sec)
+	JMAX0 = 36. # maximum electron transport capacity (umol/m2/sec)
 	PSILA0 = -3. # leaf water potential at point of full stomatal closure (MPa)
 	PSILA1 = -0.5 # leaf water potential at onset of stomatal closure (MPa)
 	
-	#CAM-specific parameters
-	MMAX = 230000000.  # max concentration of malic acid (umol/m^3) 
-	AMMAX = 14. # rate of malic acid storage flux (umol/(m^2 s) 
+	# CAM-specific parameters (only needed for CAM photosynthetic species)
+	MMAX = 230000000.  # max concentration of malic acid (umol/m3) 
+	AMMAX = 14. # rate of malic acid storage flux (umol/m2/s) 
 
 class Pmenz(object):
 	"""Pseudotsuga menziesii (Douglas fir)"""
-	NAME = 'P. menz'
-	PTYPE = C3
+	NAME = 'P. menz' # species abbreviation (first letter genus, first four letters species)
+	PTYPE = C3 # photosynthetic pathway (C3, C4, or CAM)
 
-	ZR = 0.65
-	LAI = 8.4
-	GCUT = .007
-	GA = 324.
-	RAIW = 10.
-	GWMAX = .005
-	GPMAX = 0.056
-	VWT = 0.27/LAI
-	CAP = 0.15
+	# Plant hydraulic paramters
+	ZR = 0.65 # rooting depth (m)
+	LAI = 8.4 # leaf area index (-)
+	GCUT = .007 # cuticular conductance to water vapor (mm/s)
+	GA = 324. # atmospheric conductance per unit ground area (mm/s)
+	RAIW = 10. # well-watered root area index (-)
+	GPMAX = 0.056 # maximum plant stem hydraulic conductance (um/MPa/s)
 
-	VCMAX0 = 57.7
-	JMAX0 = 98.5
-	PSILA0 = -3.
-	PSILA1 = -0.5
+	# Plant water storage parameters (only needed for plant hydraulics with capacitance option)
 	capOn = True
+	GWMAX = .005 # max. conductance between water storage tissue and plant xylem (um/MPa/s)
+	VWT = 0.27/LAI # maximum water storage depth (m)
+	CAP = 0.15 # hydraulic capacitance (MPa-1)
+
+	# Photosynthetic parameters
+	VCMAX0 = 57.7 # maximum carboxylation capacity (umol/m2/sec)
+	JMAX0 = 98.5 # maximum electron transport capacity (umol/m2/sec)
+	PSILA0 = -3. # leaf water potential at point of full stomatal closure (MPa)
+	PSILA1 = -0.5 # leaf water potential at onset of stomatal closure (MPa)
+	
 	
 class Sbico(object):
 	"""Sorghum bicolor"""
 	NAME = 'S. bico'
 	PTYPE = C4
 
-	ZR = 0.5
-	LAI = 5.
-	GCUT = 0.1802
-	GA = 61.
-	RAIW = 5.6
-	GPMAX = 0.13
+	# Plant hydraulic paramters
+	ZR = 0.5 # rooting depth (m)
+	LAI = 5. # leaf area index (-)
+	GCUT = 0.1802 # cuticular conductance to water vapor (mm/s)
+	GA = 61. # atmospheric conductance per unit ground area (mm/s)
+	RAIW = 5.6 # well-watered root area index (-)
+	GPMAX = 0.13 # maximum plant stem hydraulic conductance (um/MPa/s)
 
-	GWMAX = 0.
-	VWT = .000001
-	CAP = 0.15
+	# Plant water storage parameters (only needed for plant hydraulics with capacitance option)
+	GWMAX = 0. # max. conductance between water storage tissue and plant xylem (um/MPa/s)
+	VWT = .000001 # maximum water storage depth (m)
+	CAP = 0.15 # hydraulic capacitance (MPa-1)
 
-	VCMAX0 = 39.
-	JMAX0 = 180.
-	PSILA0 = -1.8
-	PSILA1 = -0.5
+	# Photosynthetic parameters
+	VCMAX0 = 39. # maximum carboxylation capacity (umol/m2/sec)
+	JMAX0 = 180. # maximum electron transport capacity (umol/m2/sec)
+	PSILA0 = -1.8 # leaf water potential at point of full stomatal closure (MPa)
+	PSILA1 = -0.5 # leaf water potential at onset of stomatal closure (MPa)
 
 class Taest(object):
 	"""Triticum aestivum (winter wheat)"""
