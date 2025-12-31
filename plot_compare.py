@@ -36,6 +36,8 @@ endDay = duration # end day of display
 # 'psi_l' - leaf water potential (MPa)
 # 'tl' - leaf temperature (K)
 # 'gp' - plant conductance (um/s/MPa)
+# 's' - soil moisture (volumetric fraction, unitless)
+# 'psi_s' - soil water potential (MPa)
 
 ### for model with plant water storage (HydroCap() option)
 # 'vw' - stored water volume (m3/m2)
@@ -70,4 +72,5 @@ fig.tight_layout()
 ax.set_xlabel("t (days)")
 ax.set_xticks(xticks*24,xticks)
 ax.legend()
+
 plt.show()
