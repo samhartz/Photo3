@@ -102,4 +102,18 @@ plt.xlim(0, dispDuration)
 #plt.legend()
 anp.show()
 
+# Plot transpiration rate
+anp = plt.figure()
+plt.title("Transpiration")
+plt.xlabel("time (d)")
+plt.ylabel("Ev (um/s)")
+plt.plot(timevec[0:daySteps*dispDuration], results['ev'][daySteps*startDay:daySteps*endDay])
+#plt.axvspan(0., 0.25, facecolor = 'k', alpha = 0.3)
+for i in range(0, dispDuration):
+	plt.axvspan(i-0.25, i+0.25, facecolor = 'k', alpha = 0.2)
+plt.xlim(0, dispDuration)
+#plt.xticks([0.,6.,12.,18.,24.])
+#plt.legend()
+anp.show()
+
 
