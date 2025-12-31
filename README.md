@@ -1,4 +1,5 @@
-# Photo3
+<img width="1338" height="631" alt="Photo3 logo cropped" src="https://github.com/user-attachments/assets/10a8730d-efbb-4bb7-b128-2997eb622e01" />
+
 The Photo3 model describes C3, C4, and CAM photosynthesis in a consistent manner. To do this, it uses a model which is built on the Farquhar et al. model for carbon assimilation and incorporates a carbon concentrating mechanism in the case of C4 photosynthesis and a circadian rhythm oscillator and malic acid storage mechanism in the case of CAM photosynthesis. It then calculates stomatal conductance and transpiration based on stomatal optimization theory. The model incorporates soil and atmospheric conditions through a representation of the soil-plant-atmosphere continuum with the option of including plant water storage. Given soil moisture, air temperature, humidity and solar radiation, the model calculates net carbon assimilation and transpiration, among other variables of interest. Photo3 is currently parameterized for three representative species, one from each photosynthetic type: winter wheat (*Triticum aestivum* L.), C3; sorghum (*Sorghum bicolor*), C4; and prickly pear (*Opuntia ficus-indica*), CAM.
 
 # Model Execution
