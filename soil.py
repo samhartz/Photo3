@@ -6,19 +6,19 @@ from dics import *
 from functions import *
 
 class Soil(object):
-	EVMAX = 3. # Maximum bare soil evaporation rate, mm/d
+	EVMAX = 3. # Maximum bare soil evaporation rate (mm/d)
 	def __init__(self, stype, dynamics, zr, s):
-		self.PSI_SS = stype.PSI_SS
-		self.B = stype.B
-		self.KS = stype.KS
-		self.N = stype.N
-		self.SH = stype.SH
-		self.ZR = zr
-		self.s = s
-		self.s_a = []
-		self.psi_s_a = []
-		self.dynamics = dynamics
-		self.rain_amt = 0 # this rain amount is in mm!!
+		self.PSI_SS = stype.PSI_SS # Saturation suction (MPa)
+		self.B = stype.B # Exponent of soil retention curve (-)
+		self.KS = stype.KS # Saturated hydraulic conductivity (cm/d)
+		self.N = stype.N # Soil porosity (-)
+		self.SH = stype.SH # Hygroscopic point of soil (-)
+		self.ZR = zr # Rooting depth (m)
+		self.s = s # Soil moisture (-)
+		self.s_a = [] # Soil moisture array (-)
+		self.psi_s_a = [] # Soil water potential array (MPa)
+		self.dynamics = dynamics # Rules according to which soil moisture evolves
+		self.rain_amt = 0 # Rain amount (mm)
 		self.sm_inp = s
 	def update(self, dt, zr, qs):
 		self.s = self.dynamics.snew(self, dt, zr, qs)
@@ -90,13 +90,13 @@ class SetSoil(object):
 		return soil.sm_inp
 
 class SaltySoil(Soil):
-	TS = 293. # soil water temp (K)
-	IV = 2. # van't hoff coefficient for NaCl
-	E = 0.95
+	TS = 293. # Soil water temp (K)
+	IV = 2. # Van't hoff coefficient for NaCl
+	E = 0.95 # Plant filtration efficiency (-)
 	def __init__(self, stype, zr, s, cs):
 		Soil.__init__(self, stype, zr, s)
-		self.cs = cs # salt concentration in soil, mol/m3
-		self.MS = cs*self.ZR*self.N*s # mass of salt in soil, mol/m2
+		self.cs = cs # Salt concentration in soil (mol/m3)
+		self.MS = cs*self.ZR*self.N*s # mass of salt in soil (mol/m2)
 		self.cs_a = []
 	def update(self, dt, zr, qs):
 		self.s = (dt/(self.N*zr*10.**6)*(-qs - (self.evap(self.s)*1000.)/(24.*60*60)- self.leak(self.s))) + self.s
@@ -109,46 +109,46 @@ class SaltySoil(Soil):
 		return self.PSI_SS*(s**-self.B) - E*self.cs*R*self.IV*self.TS*10.**(-6.)
 
 class Loam(object):
-	PSI_SS = -1.43*10.**-3.
-	B = 5.39
-	KS = 20.
-	N = .45
-	SH = .19
+	PSI_SS = -1.43*10.**-3. # Saturation suction (MPa)
+	B = 5.39 # Exponent of soil retention curve (-)
+	KS = 20. # Saturated hydraulic conductivity (cm/d)
+	N = .45 # Soil porosity (-)
+	SH = .19 # Hygroscopic point of soil (-)
 	def __init__(self):
 		pass
-
+		
 class Sand(object):
-	PSI_SS = -.34*10**-3
-	B = 4.05
-	KS = 200.
-	N = .35
-	SH = .08
+	PSI_SS = -.34*10**-3 # Saturation suction (MPa)
+	B = 4.05 # Exponent of soil retention curve (-)
+	KS = 200. # Saturated hydraulic conductivity (cm/d)
+	N = .35 # Soil porosity (-)
+	SH = .08 # Hygroscopic point of soil (-)
 	def __init__(self):
 		pass
 
 class SandyLoam(object):
-	PSI_SS = -.7*10**-3
-	B = 4.9
-	KS = 80.
-	N = .43
-	SH = .14
+	PSI_SS = -.7*10**-3 # Saturation suction (MPa)
+	B = 4.9 # Exponent of soil retention curve (-)
+	KS = 80. # Saturated hydraulic conductivity (cm/d)
+	N = .43 # Soil porosity (-)
+	SH = .14 # Hygroscopic point of soil (-)
 	def __init__(self):
 		pass
 
 class LoamySand(object):
-	PSI_SS = -.17*10**-3
-	B = 4.38
-	KS = 100.
-	N = .42
-	SH = .08
+	PSI_SS = -.17*10**-3 # Saturation suction (MPa)
+	B = 4.38 # Exponent of soil retention curve (-)
+	KS = 100. # Saturated hydraulic conductivity (cm/d)
+	N = .42 # Soil porosity (-)
+	SH = .08 # Hygroscopic point of soil (-)
 	def __init__(self):
 		pass
 
 class Clay(object):
-	PSI_SS = -1.82*10**-3
-	B = 11.4
-	KS = 1.
-	N = .5
-	SH = .47
+	PSI_SS = -1.82*10**-3 # Saturation suction (MPa)
+	B = 11.4 # Exponent of soil retention curve (-)
+	KS = 1. # Saturated hydraulic conductivity (cm/d)
+	N = .5 # Soil porosity (-)
+	SH = .47 # Hygroscopic point of soil (-)
 	def __init__(self):
 		pass
