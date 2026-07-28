@@ -6,7 +6,7 @@ from dics import *
 from functions import *
 
 class Soil(object):
-	EVMAX = 3.
+	EVMAX = 3. # Maximum bare soil evaporation rate, mm/d
 	def __init__(self, stype, dynamics, zr, s):
 		self.PSI_SS = stype.PSI_SS
 		self.B = stype.B
