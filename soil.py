@@ -59,8 +59,8 @@ class ConstantSoil(object):
 class StochasticSoil(object):
 	"""takes alpha in cm, lda in 1/d"""
 	def __init__(self, alpha, lda):
-		self.alpha = alpha
-		self.lambda_r = lda
+		self.alpha = alpha # Average rainfall depth (cm)
+		self.lambda_r = lda # Average rainfall interarrival rate (days-1)
 	def rain(self, dt, gamma):
 		if np.random.random() > self.lambda_r*dt/(3600.*24.):
 			return 0.
@@ -100,7 +100,7 @@ class SaltySoil(Soil):
 		self.cs_a = []
 	def update(self, dt, zr, qs):
 		self.s = (dt/(self.N*zr*10.**6)*(-qs - (self.evap(self.s)*1000.)/(24.*60*60)- self.leak(self.s))) + self.s
-		self.cs = self.MS/(self.s*self.N*self.ZR) # salt concentration in soil, mol/m3
+		self.cs = self.MS/(self.s*self.N*self.ZR) # salt concentration in soil (mol/m3)
 		self.s_a.append(self.s)
 		self.cs_a.append(self.cs)
 	def output(self):
